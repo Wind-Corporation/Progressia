@@ -1,0 +1,14 @@
+# Build directory
+build
+
+# Run directory
+run
+
+# Local environment setup file
+tools/private.sh
+
+# Prevent anyone from accidentally uploading CMakeFiles
+CMakeFiles
+
+# Some weirdos use Kate
+*.kate-swp

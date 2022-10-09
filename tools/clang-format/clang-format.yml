@@ -1,0 +1,4 @@
+BasedOnStyle: LLVM
+
+# Use larger indentation
+IndentWidth: 4

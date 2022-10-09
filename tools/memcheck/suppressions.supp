@@ -1,0 +1,28 @@
+{
+    Known X library leak (1)
+    Memcheck:Leak
+    match-leak-kinds: definite
+    fun:malloc
+    obj:/usr/lib/x86_64-linux-gnu/libxcb.so.1.1.0
+    ...
+    fun:vkEnumeratePhysicalDevices
+}
+{
+    Known X library leak (2)
+    Memcheck:Leak
+    match-leak-kinds: definite
+    fun:calloc
+    fun:_XimOpenIM
+    fun:_XimRegisterIMInstantiateCallback
+    fun:XRegisterIMInstantiateCallback
+    fun:_glfwPlatformInit
+    fun:glfwInit
+}
+{
+    Ignore errors in DL loading
+    Memcheck:Addr8
+    ...
+    fun:decompose_rpath
+    ...
+    fun:dl_open_worker
+}
