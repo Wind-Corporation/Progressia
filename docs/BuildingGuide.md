@@ -1,15 +1,15 @@
 # Building guide
 
-At this time, building  is only supported in GNU/Linux  targeting GNU/Linux X11.
-See also [Development Setup Guide](DevelopmentSetupGuide.md) if you want to make
-git commits.
+At this time, building  is only supported in GNU/Linux  targeting GNU/Linux with
+X11/Wayland and Windows (cross-compilation). See also
+[Development Setup Guide](DevelopmentSetupGuide.md)
+if you want to make git commits.
 
 ## Prerequisites
 
 Install the following software:
   - a C++ compiler (GCC or clang preferably),
   - CMake,
-  - pkg-config,
   - Python 3,
   - glslc.
 
@@ -17,7 +17,6 @@ Install the following libraries with headers:
   - Vulkan (loader library and headers),
   - GLFW3,
   - GLM,
-  - STB,
   - Boost (only core library required).
 
 ### Debian
@@ -28,13 +27,11 @@ required software:
 apt-get install \
     g++ \
     cmake \
-    pkg-config \
     python3 &&
 apt-get install --no-install-recommends \
     libvulkan-dev \
     libglfw3-dev \
     libglm-dev \
-    libstb-dev \
     libboost-dev
 ```
 
@@ -65,9 +62,9 @@ tools/setup.sh
 `tools/setup.sh`  will  check  the availability  of  all  required commands  and
 libraries.
 
-Build   tools    use   enviroment   variables    `PATH`, `PKG_CONFIG_PATH`   and
-`CMAKE_MODULE_PATH`;  you  can   edit   these  variables   system-wide   or  use
-`tools/private.sh` to make project-specific changes.
+Build tools  use enviroment  variables `PATH`, `VULKAN_SDK`, `CMAKE_MODULE_PATH`
+and `CMAKE_PREFIX_PATH` to  locate the various  components; you  can edit  these
+variables  system-wide or use `tools/private.sh` to amend  them for build tools.
 (Your changes to `tools/private.sh` are ignored by git.)
 For example, of you ran the script to download glslc on Debian, you will need to
 add the following line to `tools/private.sh`:

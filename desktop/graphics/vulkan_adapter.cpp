@@ -15,6 +15,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
+#include "../../main/logging.h"
 #include "../../main/rendering.h"
 #include "vulkan_buffer.h"
 #include "vulkan_frame.h"
@@ -53,7 +54,8 @@ std::vector<char> tmp_readFile(const std::string &path) {
 
     if (resource.data == nullptr) {
         // REPORT_ERROR
-        std::cerr << "Could not find resource \"" << path << "\"" << std::endl;
+        progressia::main::logging::fatal()
+            << "Could not find resource \"" << path << "\"";
         exit(1);
     }
 

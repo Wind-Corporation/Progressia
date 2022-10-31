@@ -1,0 +1,5 @@
+#pragma once
+
+#define _VERSION "@VERSION@"
+#define _BUILD_ID "@BUILD_ID@"
+#cmakedefine VULKAN_ERROR_CHECKING

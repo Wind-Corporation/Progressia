@@ -4,8 +4,12 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <sstream>
 
+#include "../../main/logging.h"
+#include "../../main/meta.h"
 #include "vulkan_mgmt.h"
+using namespace progressia::main::logging;
 
 namespace progressia {
 namespace desktop {
@@ -16,12 +20,12 @@ static void onGlfwError(int errorCode, const char *description);
 static void onWindowGeometryChange(GLFWwindow *window, int width, int height);
 
 void initializeGlfw() {
-    std::cout << "Beginning GLFW init" << std::endl;
+    debug("Beginning GLFW init");
 
     glfwSetErrorCallback(onGlfwError);
 
     if (!glfwInit()) {
-        std::cout << "glfwInit() failed" << std::endl;
+        fatal("glfwInit() failed");
         // REPORT_ERROR
         exit(1);
     }
@@ -29,16 +33,26 @@ void initializeGlfw() {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
-    window = glfwCreateWindow(800, 800, "Progressia", nullptr, nullptr);
+    std::string title;
+
+    {
+        std::stringstream accumulator;
+        accumulator << progressia::main::meta::NAME << " "
+                    << progressia::main::meta::VERSION << " build "
+                    << progressia::main::meta::BUILD_ID;
+        title = accumulator.str();
+    }
+
+    window = glfwCreateWindow(800, 800, title.c_str(), nullptr, nullptr);
 
     glfwSetWindowSizeCallback(window, onWindowGeometryChange);
 
-    std::cout << "GLFW init complete" << std::endl;
+    debug("GLFW init complete");
 }
 
 void showWindow() {
     glfwShowWindow(window);
-    std::cout << "Window now visible" << std::endl;
+    debug("Window now visible");
 }
 
 bool shouldRun() { return !glfwWindowShouldClose(window); }
@@ -48,8 +62,7 @@ void doGlfwRoutine() { glfwPollEvents(); }
 void shutdownGlfw() { glfwTerminate(); }
 
 void onGlfwError(int errorCode, const char *description) {
-    std::cout << "[GLFW] " << description << " (" << errorCode << ")"
-              << std::endl;
+    fatal() << "[GLFW] " << description << " (" << errorCode << ")";
     // REPORT_ERROR
     exit(1);
 }

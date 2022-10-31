@@ -6,69 +6,73 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/tools/cmake")
 include(embed)
 
 add_executable(progressia
-	desktop/main.cpp
-	desktop/graphics/glfw_mgmt.cpp
-	desktop/graphics/vulkan_common.cpp
-	desktop/graphics/vulkan_frame.cpp
-	desktop/graphics/vulkan_image.cpp
-	desktop/graphics/vulkan_mgmt.cpp
-	desktop/graphics/vulkan_pick_device.cpp
-	desktop/graphics/vulkan_pipeline.cpp
-	desktop/graphics/vulkan_render_pass.cpp
-	desktop/graphics/vulkan_descriptor_set.cpp
-	desktop/graphics/vulkan_texture_descriptors.cpp
-	desktop/graphics/vulkan_adapter.cpp
-	desktop/graphics/vulkan_swap_chain.cpp
+    desktop/main.cpp
+    desktop/graphics/glfw_mgmt.cpp
+    desktop/graphics/vulkan_common.cpp
+    desktop/graphics/vulkan_frame.cpp
+    desktop/graphics/vulkan_image.cpp
+    desktop/graphics/vulkan_mgmt.cpp
+    desktop/graphics/vulkan_pick_device.cpp
+    desktop/graphics/vulkan_pipeline.cpp
+    desktop/graphics/vulkan_render_pass.cpp
+    desktop/graphics/vulkan_descriptor_set.cpp
+    desktop/graphics/vulkan_texture_descriptors.cpp
+    desktop/graphics/vulkan_adapter.cpp
+    desktop/graphics/vulkan_swap_chain.cpp
 
-	main/game.cpp
+    main/game.cpp
+    main/logging.cpp
 
-	main/rendering/image.cpp
+    main/rendering/image.cpp
 
-	main/stb_image.c
-	${generated}/embedded_resources.cpp
+    main/stb_image.c
+    ${generated}/embedded_resources.cpp
 )
 
 target_include_directories(progressia PRIVATE ${generated})
+
+# Do Windows-specific tweaks
+if (WIN32)
+    set_target_properties(progressia PROPERTIES WIN32_EXECUTABLE true)
+    target_link_options(progressia PRIVATE -static-libstdc++ -static-libgcc)
+endif()
 
 # Compilation settings
 set_property(TARGET progressia PROPERTY CXX_STANDARD 17)
 target_compile_options(progressia PRIVATE -Wall -Wextra -Wpedantic -Werror)
 
-# Pass version information
-target_compile_definitions(progressia PRIVATE
-                           _MAJOR=0 _MINOR=0 _PATCH=0 _BUILD=1)
+# Version information
+if (NOT DEFINED BUILD_ID)
+    set(BUILD_ID "dev")
+endif()
+
+set(VERSION "0.0.1")
 
 # Debug options
 option(VULKAN_ERROR_CHECKING "Enable Vulkan validation layers to detect Vulkan API usage errors at runtime")
-if (VULKAN_ERROR_CHECKING)
-	target_compile_definitions(progressia PRIVATE VULKAN_ERROR_CHECKING)
-endif()
+
+# Pass configuration options
+configure_file(${PROJECT_SOURCE_DIR}/main/config.h.in
+               ${PROJECT_BINARY_DIR}/config.h)
 
 # Libraries
 
-find_package(PkgConfig REQUIRED)
-
 # Use Vulkan
-find_package(Vulkan REQUIRED)
-target_link_libraries(progressia ${Vulkan_LIBRARIES})
-target_include_directories(progressia PUBLIC ${Vulkan_INCLUDE_DIRS})
+find_package(Vulkan 1.0 REQUIRED)
+target_link_libraries(progressia Vulkan::Vulkan)
 
 # Use GLFW3
-find_package(glfw3 REQUIRED)
+find_package(glfw3 3.3.2 REQUIRED)
 target_link_libraries(progressia glfw)
 
 # Use GLM
-pkg_check_modules(GLM REQUIRED glm)
-target_link_libraries(progressia ${GLM_LIBRARIES})
-target_include_directories(progressia PUBLIC ${GLM_INCLUDE_DIRS})
-target_compile_options(progressia PUBLIC ${GLM_CFLAGS_OTHER})
+find_package(glm REQUIRED) # glmConfig-version.cmake is broken
+target_link_libraries(progressia glm::glm)
 
 # Use STB
-pkg_check_modules(STB REQUIRED stb)
-target_link_libraries(progressia ${STB_LIBRARIES})
-target_include_directories(progressia PUBLIC ${STB_INCLUDE_DIRS})
-target_compile_options(progressia PUBLIC ${STB_CFLAGS_OTHER})
+target_include_directories(progressia PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/stb/include)
 
-# Use Boost (header only)
-find_package(Boost REQUIRED)
-target_include_directories(progressia PUBLIC ${Boost_INCLUDE_DIRS})
+# Use Boost
+find_package(Boost 1.74 REQUIRED)
+target_link_libraries(progressia Boost::headers)

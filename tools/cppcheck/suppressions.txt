@@ -13,3 +13,6 @@ missingInclude:*
 
 # Shut up. Just shut up.
 unmatchedSuppression:*
+
+# Do not check third-party libraries
+*:*lib*

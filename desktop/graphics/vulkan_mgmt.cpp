@@ -1,7 +1,11 @@
 #include "vulkan_mgmt.h"
 
+#include "../config.h"
 #include "vulkan_common.h"
 #include "vulkan_swap_chain.h"
+
+#include "../../main/logging.h"
+using namespace progressia::main::logging;
 
 namespace progressia {
 namespace desktop {
@@ -9,7 +13,7 @@ namespace desktop {
 Vulkan *vulkan;
 
 void initializeVulkan() {
-    std::cout << "Vulkan initializing" << std::endl;
+    debug("Vulkan initializing");
 
     // Instance extensions
 
@@ -42,7 +46,7 @@ void initializeVulkan() {
 
     vulkan = new Vulkan(instanceExtensions, deviceExtensions, validationLayers);
 
-    std::cout << "Vulkan initialized" << std::endl;
+    debug("Vulkan initialized");
 }
 
 Vulkan *getVulkan() { return vulkan; }
@@ -54,14 +58,14 @@ void endRender() { return vulkan->endRender(); }
 void resizeVulkanSurface() { vulkan->getSwapChain().recreate(); }
 
 void shutdownVulkan() {
-    std::cout << "Vulkan terminating" << std::endl;
+    debug("Vulkan terminating");
 
     if (vulkan != nullptr) {
         delete vulkan;
         vulkan = nullptr;
     }
 
-    std::cout << "Vulkan terminated" << std::endl;
+    debug("Vulkan terminated");
 }
 
 } // namespace desktop

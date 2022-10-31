@@ -8,6 +8,9 @@
 
 #include "stb/stb_image.h"
 
+#include "../logging.h"
+using namespace progressia::main::logging;
+
 namespace progressia {
 namespace main {
 
@@ -22,8 +25,7 @@ Image loadImage(const std::filesystem::path &path) {
     std::ifstream file(path, std::ios::ate | std::ios::binary);
 
     if (!file.is_open()) {
-        std::cout << "Could not read a PNG image from file " << path
-                  << std::endl;
+        fatal() << "Could not access a PNG image in file " << path;
         // REPORT_ERROR
         exit(1);
     }
@@ -45,8 +47,7 @@ Image loadImage(const std::filesystem::path &path) {
                               &channelsInFile, STBI_rgb_alpha);
 
     if (stbAllocatedData == NULL) {
-        std::cout << "Could not load a PNG image from file " << path
-                  << std::endl;
+        fatal() << "Could not decode a PNG image from file " << path;
         // REPORT_ERROR
         exit(1);
     }

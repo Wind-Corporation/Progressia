@@ -74,7 +74,6 @@ function check_cmd() {
     unset found
 }
 
-check_cmd pkg-config
 check_cmd cmake
 check_cmd python3
 check_cmd glslc
@@ -91,8 +90,8 @@ fi
 
 # Try generating build files
 
-if FAIL_SILENTLY=true find_cmd found_cmake cmake; then
-    if CMAKE="$found_cmake" "$tools_dir/build.sh" --dont-build; then
+if FAIL_SILENTLY=true find_cmd CMAKE cmake; then
+    if CMAKE="$CMAKE" "$tools_dir/build.sh" --dont-build; then
         echo 'CMake did not encounter any problems'
     else
         echo 'Could not generate build files; libraries are probably missing'
@@ -113,8 +112,8 @@ fail "Could not find the following required commands or libraries:
 
 You can resolve these errors in the following ways:
   1. Install required software packages. See README for specific instructions.
-  2. Edit PATH, PKG_CONFIG_PATH or CMAKE_MODULE_PATH environment variables in
-       tools/private.sh to include your installation directories.
+  2. Edit PATH or CMAKE_MODULE_PATH environment variables in tools/private.sh
+       to include your installation directories.
 "
 
 

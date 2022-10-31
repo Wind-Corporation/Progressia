@@ -1,43 +1,40 @@
 #pragma once
 
+#include "../config.h"
 #include <cstdlib>
 
 namespace progressia {
 namespace main {
 namespace meta {
 
+namespace detail {
+constexpr static uint32_t getVersionNumber(const char *versionStr) {
+    uint32_t parts[] = {0, 0, 0};
+    std::size_t partCount = sizeof(parts) / sizeof(parts[0]);
+    std::size_t currentPart = 0;
+
+    for (const char *cp = versionStr; *cp != '\0'; cp++) {
+        char c = *cp;
+        if (c == '.') {
+            currentPart++;
+        } else if (currentPart < partCount && c >= '0' && c <= '9') {
+            parts[currentPart] =
+                parts[currentPart] * 10 + static_cast<uint32_t>(c - '0');
+        }
+    }
+
+    return (parts[0] << 16) | (parts[1] << 8) | (parts[2] << 0);
+}
+} // namespace detail
+
 constexpr const char *NAME = "Progressia";
+constexpr const char *VERSION = _VERSION;
+constexpr const char *BUILD_ID = _BUILD_ID;
 
-#ifndef _MAJOR
-#warning Version number (_MAJOR _MINOR _PATCH _BUILD) not set, using 0.0.0+1
-#define _MAJOR 0
-#define _MINOR 0
-#define _PATCH 0
-#define _BUILD 1
-#endif
-
-using VersionUnit = uint8_t;
-using VersionInt = uint32_t;
-
-constexpr struct {
-
-    VersionUnit major, minor, patch, build;
-
-    VersionInt number;
-
-    bool isRelease;
-
-} VERSION{_MAJOR,
-          _MINOR,
-          _PATCH,
-          _BUILD,
-
-          (static_cast<VersionInt>(_MAJOR) << 24) |
-              (static_cast<VersionInt>(_MINOR) << 16) |
-              (static_cast<VersionInt>(_PATCH) << 8) |
-              (static_cast<VersionInt>(_BUILD) << 0),
-
-          _BUILD == 0};
+constexpr uint32_t VERSION_NUMBER = detail::getVersionNumber(_VERSION);
+constexpr uint32_t VERSION_MAJOR = (VERSION_NUMBER & 0xFF0000) >> 16;
+constexpr uint32_t VERSION_MINOR = (VERSION_NUMBER & 0x00FF00) >> 8;
+constexpr uint32_t VERSION_PATCH = (VERSION_NUMBER & 0x0000FF) >> 0;
 
 } // namespace meta
 } // namespace main

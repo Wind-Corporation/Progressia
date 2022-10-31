@@ -1,5 +1,6 @@
 #include "vulkan_common.h"
 
+#include "../config.h"
 #include "vulkan_adapter.h"
 #include "vulkan_frame.h"
 #include "vulkan_pick_device.h"
@@ -8,8 +9,11 @@
 #include "vulkan_swap_chain.h"
 #include "vulkan_texture_descriptors.h"
 
+#include "../../main/logging.h"
 #include "../../main/meta.h"
 #include "glfw_mgmt_details.h"
+
+using namespace progressia::main::logging;
 
 namespace progressia {
 namespace desktop {
@@ -46,7 +50,7 @@ Vulkan::Vulkan(std::vector<const char *> instanceExtensions,
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.pApplicationName = NAME;
         appInfo.applicationVersion =
-            VK_MAKE_VERSION(VERSION.major, VERSION.minor, VERSION.patch);
+            VK_MAKE_VERSION(VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
         appInfo.pEngineName = nullptr;
         appInfo.engineVersion = 0;
         appInfo.apiVersion = VK_API_VERSION_1_0;
@@ -69,12 +73,11 @@ Vulkan::Vulkan(std::vector<const char *> instanceExtensions,
             }
 
             if (!toFind.empty()) {
-                std::cout << "Could not locate following requested Vulkan "
-                             "extensions:";
+                auto m = fatal(
+                    "Could not locate following requested Vulkan extensions:");
                 for (const auto &extension : toFind) {
-                    std::cout << "\n\t- " << extension;
+                    m << "\n\t- " << extension;
                 }
-                std::cout << std::endl;
                 // REPORT_ERROR
                 exit(1);
             }
@@ -99,12 +102,11 @@ Vulkan::Vulkan(std::vector<const char *> instanceExtensions,
             }
 
             if (!toFind.empty()) {
-                std::cout << "Could not locate following requested Vulkan "
-                             "validation layers:";
+                auto m = fatal("Could not locate following requested Vulkan "
+                               "validation layers:");
                 for (const auto &layer : toFind) {
-                    std::cout << "\n\t- " << layer;
+                    m << "\n\t- " << layer;
                 }
-                std::cout << std::endl;
                 // REPORT_ERROR
                 exit(1);
             }
@@ -143,7 +145,7 @@ Vulkan::Vulkan(std::vector<const char *> instanceExtensions,
         vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 
         if (deviceCount == 0) {
-            std::cout << "No GPUs with Vulkan support found" << std::endl;
+            fatal("No GPUs with Vulkan support found");
             // REPORT_ERROR
             exit(1);
         }
@@ -342,7 +344,7 @@ VkFormat Vulkan::findSupportedFormat(const std::vector<VkFormat> &candidates,
         }
     }
 
-    std::cout << "Could not find a suitable format" << std::endl;
+    fatal("Could not find a suitable format");
     // REPORT_ERROR
     exit(1);
 }
@@ -364,7 +366,7 @@ uint32_t Vulkan::findMemoryType(uint32_t allowedByDevice,
         return i;
     }
 
-    std::cout << "Could not find suitable memory type" << std::endl;
+    fatal("Could not find suitable memory type");
     // REPORT_ERROR
     exit(1);
     return -1;
@@ -467,8 +469,8 @@ debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         break;
     }
 
-    std::cout << "[Vulkan] [" << typeStr << " / " << severityStr << "]\t"
-              << pCallbackData->pMessage << std::endl;
+    error() << "[Vulkan] [" << typeStr << " / " << severityStr << "]\t"
+            << pCallbackData->pMessage;
     // REPORT_ERROR
     return VK_FALSE;
 }
@@ -519,7 +521,7 @@ VulkanErrorHandler::attachDebugProbe(VkInstanceCreateInfo &createInfo) {
 
 void VulkanErrorHandler::onInstanceReady() {
 #ifdef VULKAN_ERROR_CHECKING
-    std::cout << "Registering debug callback" << std::endl;
+    debug("Registering debug callback");
 
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
     populateDebugMessengerCreateInfo(createInfo, vulkan);
@@ -537,8 +539,7 @@ void VulkanErrorHandler::handleVkResult(const char *errorMessage,
         return;
     }
 
-    std::cout << "Vulkan error (" << result << "): " << errorMessage
-              << std::endl;
+    fatal() << "Vulkan error (" << result << "): " << errorMessage;
     // REPORT_ERROR
     exit(1);
 }

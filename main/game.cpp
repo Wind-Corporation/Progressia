@@ -12,6 +12,9 @@
 
 #include "rendering.h"
 
+#include "logging.h"
+using namespace progressia::main::logging;
+
 namespace progressia {
 namespace main {
 
@@ -56,13 +59,13 @@ void addBox(glm::vec3 origin, glm::vec3 length, glm::vec3 height,
 
 void initialize(GraphicsInterface &gintp) {
 
-    std::cout << "game init begin" << std::endl;
+    debug("game init begin");
     gint = &gintp;
 
-    texture1.reset(
-        gint->newTexture(progressia::main::loadImage(u"../assets/texture.png")));
-    texture2.reset(
-        gint->newTexture(progressia::main::loadImage(u"../assets/texture2.png")));
+    texture1.reset(gint->newTexture(
+        progressia::main::loadImage(u"../assets/texture.png")));
+    texture2.reset(gint->newTexture(
+        progressia::main::loadImage(u"../assets/texture2.png")));
 
     // Cube 1
     {
@@ -121,7 +124,7 @@ void initialize(GraphicsInterface &gintp) {
     perspective.reset(gint->newView());
     light.reset(gint->newLight());
 
-    std::cout << "game init complete" << std::endl;
+    debug("game init complete");
 }
 
 void renderTick() {
@@ -161,7 +164,7 @@ void renderTick() {
 }
 
 void shutdown() {
-    std::cout << "game shutdown begin" << std::endl;
+    debug("game shutdown begin");
 
     cube1.reset();
     cube2.reset();
@@ -171,7 +174,7 @@ void shutdown() {
     light.reset();
     perspective.reset();
 
-    std::cout << "game shutdown complete" << std::endl;
+    debug("game shutdown complete");
 }
 
 } // namespace main

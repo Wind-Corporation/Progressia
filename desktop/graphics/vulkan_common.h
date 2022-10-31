@@ -19,6 +19,7 @@
 
 #include <boost/core/noncopyable.hpp>
 
+#include "../../main/logging.h"
 #include "../../main/rendering/graphics_interface.h"
 
 namespace progressia {
@@ -154,9 +155,10 @@ class Vulkan : public VkObjectWrapper {
         if (func != nullptr) {
             return func(instance, std::forward<Args>(args)...);
         } else {
-            std::cout << "[Vulkan] [dynVkCall / VkResult]\tFunction not found "
-                         "for name \""
-                      << functionName << "\"" << std::endl;
+            progressia::main::logging::error()
+                << "[Vulkan] [dynVkCall / VkResult]\tFunction not found for "
+                   "name \""
+                << functionName << "\"";
             // REPORT_ERROR
             return VK_ERROR_EXTENSION_NOT_PRESENT;
         }
@@ -173,9 +175,9 @@ class Vulkan : public VkObjectWrapper {
             func(instance, std::forward<Args>(args)...);
             return VK_SUCCESS;
         } else {
-            std::cout
+            progressia::main::logging::error()
                 << "[Vulkan] [dynVkCall / void]\tFunction not found for name \""
-                << functionName << "\"" << std::endl;
+                << functionName << "\"";
             // REPORT_ERROR
             return VK_ERROR_EXTENSION_NOT_PRESENT;
         }

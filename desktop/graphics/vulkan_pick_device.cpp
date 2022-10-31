@@ -1,6 +1,8 @@
 #include "vulkan_pick_device.h"
 
+#include "../../main/logging.h"
 #include "vulkan_swap_chain.h"
+using namespace progressia::main::logging;
 
 namespace progressia {
 namespace desktop {
@@ -60,14 +62,15 @@ pickPhysicalDevice(std::vector<PhysicalDeviceData> &choices, Vulkan &vulkan,
     choices.erase(it, choices.end());
 
     if (choices.empty()) {
-        std::cout << "No suitable GPUs found" << std::endl;
+        fatal("No suitable GPUs found");
         // REPORT_ERROR
         exit(1);
     }
 
     const auto *pick = &choices.front();
 
-    std::cout << "Suitable devices:";
+    auto m = info("\n");
+    m << "Suitable devices:";
     for (const auto &option : choices) {
 
         struct {
@@ -80,17 +83,17 @@ pickPhysicalDevice(std::vector<PhysicalDeviceData> &choices, Vulkan &vulkan,
                         {"CPU", -1}};
 
         auto type = option.properties.deviceType;
-        std::cout << "\n\t- " << opinions[type].description << " "
-                  << option.properties.deviceName;
+        m << "\n\t- " << opinions[type].description << " "
+          << option.properties.deviceName;
 
         if (opinions[pick->properties.deviceType].value <
             opinions[type].value) {
             pick = &option;
         }
     }
-    std::cout << std::endl;
+    m << "\n";
 
-    std::cout << "Picked device " << pick->properties.deviceName << std::endl;
+    m << "Picked device " << pick->properties.deviceName;
     return *pick;
 }
 

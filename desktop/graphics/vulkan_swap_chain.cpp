@@ -9,6 +9,9 @@
 #include "vulkan_common.h"
 #include "vulkan_render_pass.h"
 
+#include "../../main/logging.h"
+using namespace progressia::main::logging;
+
 namespace progressia {
 namespace desktop {
 
@@ -136,10 +139,9 @@ void SwapChain::create() {
     for (auto &attachment : vulkan.getAdapter().getAttachments()) {
         if (attachment.format == VK_FORMAT_UNDEFINED) {
             if (!attachment.image) {
-                std::cout << "Attachment " << attachment.name
-                          << " format is VK_FORMAT_UNDEFINED but it does not "
-                             "have an image"
-                          << std::endl;
+                fatal() << "Attachment " << attachment.name
+                        << " format is VK_FORMAT_UNDEFINED but it does not "
+                           "have an image";
                 // REPORT_ERROR
                 exit(1);
             }
@@ -162,9 +164,8 @@ void SwapChain::create() {
             } else if (attachment.image) {
                 attachmentViews.push_back(attachment.image->view);
             } else {
-                std::cout << "Attachment " << attachment.name
-                          << " is not colorBuffer but it does not have an image"
-                          << std::endl;
+                fatal() << "Attachment " << attachment.name
+                        << " is not colorBuffer but it does not have an image";
                 // REPORT_ERROR
                 exit(1);
             }
@@ -196,7 +197,7 @@ VkSurfaceFormatKHR SwapChain::chooseSurfaceFormat(
         }
     }
 
-    std::cout << "No suitable formats available" << std::endl;
+    fatal("No suitable formats available");
     // REPORT_ERROR
     exit(1);
 }

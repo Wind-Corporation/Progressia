@@ -55,9 +55,7 @@ $unstaged_changes"
         fi
 
         git diff -U0 --no-color --relative HEAD \
-            '*.cpp' \
-            '*.h' \
-            '*.inl' \
+            {desktop,main}/{'*.cpp','*.h','*.inl'} \
         | command "$CLANG_FORMAT_DIFF" -p1 -style="$style" -i --verbose
         exit_code="$?"
         git add "$root_dir"
