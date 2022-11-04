@@ -49,6 +49,7 @@ bool Frame::startRender() {
     vkWaitForFences(vulkan.getDevice(), 1, &inFlightFence, VK_TRUE, UINT64_MAX);
 
     // Acquire an image
+    imageIndexInFlight = 0;
     VkResult result = vkAcquireNextImageKHR(
         vulkan.getDevice(), vulkan.getSwapChain().getVk(), UINT64_MAX,
         imageAvailableSemaphore, VK_NULL_HANDLE, &*imageIndexInFlight);
@@ -163,6 +164,8 @@ void Frame::endRender() {
     } else {
         vulkan.handleVkResult("Could not present", result);
     }
+
+    imageIndexInFlight.reset();
 }
 
 VkCommandBuffer Frame::getCommandBuffer() { return commandBuffer; }
