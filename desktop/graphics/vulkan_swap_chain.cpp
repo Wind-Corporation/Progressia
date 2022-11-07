@@ -7,6 +7,7 @@
 #include "glfw_mgmt_details.h"
 #include "vulkan_adapter.h"
 #include "vulkan_common.h"
+#include "vulkan_physical_device.h"
 #include "vulkan_render_pass.h"
 
 #include "../../main/logging.h"
@@ -51,7 +52,8 @@ bool SwapChain::isSwapChainSuitable(const SupportDetails &details) {
 }
 
 void SwapChain::create() {
-    auto details = querySwapChainSupport(vulkan.getPhysicalDevice(), vulkan);
+    auto details =
+        querySwapChainSupport(vulkan.getPhysicalDevice().getVk(), vulkan);
     auto surfaceFormat = chooseSurfaceFormat(details.formats);
     auto presentMode = choosePresentMode(details.presentModes, true);
     this->extent = chooseExtent(details.capabilities);
@@ -274,7 +276,8 @@ SwapChain::SwapChain(Vulkan &vulkan)
     : vk(VK_NULL_HANDLE), colorBuffer(nullptr),
       colorBufferViews(), extent{0, 0}, depthBuffer(nullptr), framebuffers(),
       vulkan(vulkan) {
-    auto details = querySwapChainSupport(vulkan.getPhysicalDevice(), vulkan);
+    auto details =
+        querySwapChainSupport(vulkan.getPhysicalDevice().getVk(), vulkan);
     auto surfaceFormat = chooseSurfaceFormat(details.formats);
 
     vulkan.getAdapter().getAttachments().push_back(

@@ -5,14 +5,30 @@
 #include "../../main/util.h"
 #include "vulkan_frame.h"
 #include "vulkan_pipeline.h"
+#include "vulkan_physical_device.h"
 
 namespace progressia {
 namespace desktop {
 
+namespace detail {
+
+    template <typename T>
+    std::size_t offsetOf(Vulkan &vulkan) {
+        auto step = vulkan.getPhysicalDevice().getMinUniformOffset();
+        return ((sizeof(T) - 1) / step + 1) * step; // Round up to multiple
+    }
+
+    template <typename T>
+    std::size_t offsetOf(Vulkan &vulkan, const T&) {
+        return offsetOf<T>(vulkan);
+    }
+
+}
+
 template <typename... Entries>
 Uniform<Entries...>::StateImpl::Set::Set(VkDescriptorSet vk, Vulkan &vulkan)
     : vk(vk),
-      contents((sizeof(Entries) + ...), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+      contents((detail::offsetOf<Entries>(vulkan) + ...), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                    VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                vulkan) {}
@@ -48,7 +64,7 @@ Uniform<Entries...>::StateImpl::StateImpl(
             writes[index].descriptorCount = 1;
             writes[index].pBufferInfo = &bufferInfos[index];
 
-            offset += sizeof(Entry);
+            offset += detail::offsetOf<Entry>(vulkan);
             index++;
         })
     }
@@ -71,7 +87,7 @@ void Uniform<Entries...>::State::update(const Entries &...entries) {
     auto *dst = state.newContents.data();
     FOR_PACK(Entries, entries, e, {
         std::memcpy(dst, &e, sizeof(e));
-        dst += sizeof(e);
+        dst += detail::offsetOf(uniform->getVulkan(), e);
     })
     state.setsToUpdate = state.sets.size();
 }

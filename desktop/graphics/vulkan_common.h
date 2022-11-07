@@ -61,6 +61,7 @@ class VkObjectWrapper : private boost::noncopyable {
 constexpr std::size_t MAX_FRAMES_IN_FLIGHT = 2;
 
 class VulkanErrorHandler;
+class PhysicalDevice;
 class Surface;
 class Queue;
 class Queues;
@@ -75,10 +76,10 @@ class Frame;
 class Vulkan : public VkObjectWrapper {
   private:
     VkInstance instance = VK_NULL_HANDLE;
-    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkDevice device = VK_NULL_HANDLE;
 
     std::unique_ptr<VulkanErrorHandler> errorHandler;
+    std::unique_ptr<PhysicalDevice> physicalDevice;
     std::unique_ptr<Surface> surface;
     std::unique_ptr<Queues> queues;
     std::unique_ptr<CommandPool> commandPool;
@@ -103,9 +104,9 @@ class Vulkan : public VkObjectWrapper {
     ~Vulkan();
 
     VkInstance getInstance() const;
-    VkPhysicalDevice getPhysicalDevice() const;
     VkDevice getDevice() const;
 
+    const PhysicalDevice &getPhysicalDevice() const;
     Surface &getSurface();
     const Surface &getSurface() const;
     Queues &getQueues();

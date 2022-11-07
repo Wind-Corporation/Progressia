@@ -19,6 +19,7 @@ add_executable(progressia
     desktop/graphics/vulkan_texture_descriptors.cpp
     desktop/graphics/vulkan_adapter.cpp
     desktop/graphics/vulkan_swap_chain.cpp
+    desktop/graphics/vulkan_physical_device.cpp
 
     main/game.cpp
     main/logging.cpp

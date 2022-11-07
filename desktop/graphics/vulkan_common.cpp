@@ -3,6 +3,7 @@
 #include "../config.h"
 #include "vulkan_adapter.h"
 #include "vulkan_frame.h"
+#include "vulkan_physical_device.h"
 #include "vulkan_pick_device.h"
 #include "vulkan_pipeline.h"
 #include "vulkan_render_pass.h"
@@ -150,31 +151,24 @@ Vulkan::Vulkan(std::vector<const char *> instanceExtensions,
             exit(1);
         }
 
-        std::vector<VkPhysicalDevice> devices(deviceCount);
-        vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+        std::vector<VkPhysicalDevice> vkDevices(deviceCount);
+        vkEnumeratePhysicalDevices(instance, &deviceCount, vkDevices.data());
 
-        std::vector<PhysicalDeviceData> choices;
-
-        for (const auto &device : devices) {
-            PhysicalDeviceData data = {};
-            data.device = device;
-
-            vkGetPhysicalDeviceProperties(device, &data.properties);
-            vkGetPhysicalDeviceFeatures(device, &data.features);
-
-            choices.push_back(data);
+        std::vector<PhysicalDevice> choices;
+        for (const auto &vkDevice : vkDevices) {
+            choices.push_back(PhysicalDevice(vkDevice));
         }
 
         const auto &result =
             pickPhysicalDevice(choices, *this, deviceExtensions);
-        physicalDevice = result.device;
+        physicalDevice = std::make_unique<PhysicalDevice>(result);
     }
 
     /*
      * Setup queues
      */
 
-    queues = std::make_unique<Queues>(physicalDevice, *this);
+    queues = std::make_unique<Queues>(physicalDevice->getVk(), *this);
 
     /*
      * Create logical device
@@ -207,9 +201,9 @@ Vulkan::Vulkan(std::vector<const char *> instanceExtensions,
 
         // Create logical device
 
-        handleVkResult(
-            "Could not create logical device",
-            vkCreateDevice(physicalDevice, &createInfo, nullptr, &device));
+        handleVkResult("Could not create logical device",
+                       vkCreateDevice(physicalDevice->getVk(), &createInfo,
+                                      nullptr, &device));
 
         // Store queue handles
 
@@ -275,13 +269,16 @@ Vulkan::~Vulkan() {
     commandPool.reset();
     vkDestroyDevice(device, nullptr);
     surface.reset();
+    physicalDevice.reset();
     errorHandler.reset();
     vkDestroyInstance(instance, nullptr);
 }
 
 VkInstance Vulkan::getInstance() const { return instance; }
 
-VkPhysicalDevice Vulkan::getPhysicalDevice() const { return physicalDevice; }
+const PhysicalDevice &Vulkan::getPhysicalDevice() const {
+    return *physicalDevice;
+}
 
 VkDevice Vulkan::getDevice() const { return device; }
 
@@ -333,7 +330,8 @@ VkFormat Vulkan::findSupportedFormat(const std::vector<VkFormat> &candidates,
 
     for (VkFormat format : candidates) {
         VkFormatProperties props;
-        vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
+        vkGetPhysicalDeviceFormatProperties(physicalDevice->getVk(), format,
+                                            &props);
 
         if (tiling == VK_IMAGE_TILING_LINEAR &&
             (props.linearTilingFeatures & features) == features) {
@@ -351,8 +349,7 @@ VkFormat Vulkan::findSupportedFormat(const std::vector<VkFormat> &candidates,
 
 uint32_t Vulkan::findMemoryType(uint32_t allowedByDevice,
                                 VkMemoryPropertyFlags desiredProperties) {
-    VkPhysicalDeviceMemoryProperties memProperties;
-    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+    auto memProperties = physicalDevice->getMemory();
 
     for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
         if (((1 << i) & allowedByDevice) == 0) {
