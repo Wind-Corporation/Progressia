@@ -2,6 +2,7 @@
 
 #include "vulkan_common.h"
 
+#include <array>
 #include <cstddef>
 #include <fstream>
 #include <memory>

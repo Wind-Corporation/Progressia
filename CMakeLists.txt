@@ -40,7 +40,13 @@ endif()
 
 # Compilation settings
 set_property(TARGET progressia PROPERTY CXX_STANDARD 17)
-target_compile_options(progressia PRIVATE -Wall -Wextra -Wpedantic -Werror)
+set_property(TARGET progressia PROPERTY CXX_STANDARD_REQUIRED ON)
+target_compile_options(progressia PRIVATE -Wall)
+
+# Extra options for gcc -- we're using this for extra static analisys for now
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(progressia PRIVATE -Wextra -Wpedantic -Werror)
+endif()
 
 # Version information
 if (NOT DEFINED BUILD_ID)

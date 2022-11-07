@@ -1,5 +1,6 @@
 #include "game.h"
 
+#include <array>
 #include <iostream>
 
 #define GLM_FORCE_RADIANS
