@@ -1,6 +1,5 @@
 #include "vulkan_common.h"
 
-#include "../config.h"
 #include "vulkan_adapter.h"
 #include "vulkan_frame.h"
 #include "vulkan_physical_device.h"

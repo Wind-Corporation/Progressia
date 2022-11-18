@@ -1,6 +1,5 @@
 #include "vulkan_mgmt.h"
 
-#include "../config.h"
 #include "vulkan_common.h"
 #include "vulkan_swap_chain.h"
 
