@@ -12,6 +12,7 @@ include(embed/embed)
 include(glslc)
 
 # Options
+option(BUILD_ID "Build ID. Set to \"dev\" unless building a release that you intend to publish" "dev")
 option(VULKAN_ERROR_CHECKING "Enable Vulkan validation layers to detect Vulkan API usage errors at runtime")
 
 # Source files
@@ -61,7 +62,7 @@ set_property(TARGET progressia PROPERTY CXX_STANDARD 17)
 set_property(TARGET progressia PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # Do Windows-specific tweaks for release builds
-if (WIN32 AND DEFINED ENV{PROGRESSIA_BUILD_ID})
+if (WIN32 AND DEFINED BUILD_ID)
     set_target_properties(progressia PROPERTIES WIN32_EXECUTABLE true)
 
     if (gcc_like_compiler)
@@ -73,16 +74,11 @@ if (WIN32 AND DEFINED ENV{PROGRESSIA_BUILD_ID})
 endif()
 
 # Extra options for gcc -- we're using this for extra static analisys for now
-if (gcc_like_compiler)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(progressia PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 
 # Pass configuration options
-if (DEFINED ENV{PROGRESSIA_BUILD_ID})
-    set(BUILD_ID ENV{PROGRESSIA_BUILD_ID})
-else()
-    set(BUILD_ID "dev")
-endif()
 file(MAKE_DIRECTORY "${generated}/config")
 configure_file(${PROJECT_SOURCE_DIR}/main/config.h.in
                ${generated}/config/config.h)
