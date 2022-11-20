@@ -51,31 +51,41 @@ target_include_directories(progressia PRIVATE ${generated}/embedded_resources)
 
 # Compilation settings
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
-    CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(gcc_like_compiler TRUE)
+# Determine command line style
+if (DEFINED compiler_cl_dialect)
+    # Do nothing
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(compiler_cl_dialect "GCC")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(compiler_cl_dialect "MSVC")
+elseif (CMAKE_CXX_SIMULATE_ID STREQUAL "GCC")
+    set(compiler_cl_dialect "GCC")
+elseif (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
+    set(compiler_cl_dialect "MSVC")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    # On Linux, clang does not have SIMULATE_ID
+    set(compiler_cl_dialect "GCC")
+elseif(WIN32)
+    message(WARNING "Could not determine compiler command line dialect, guessing MSVC")
+    set(compiler_cl_dialect "MSVC")
 else()
-    set(gcc_like_compiler FALSE)
+    message(WARNING "Could not determine compiler command line dialect, guessing GCC")
+    set(compiler_cl_dialect "GCC")
 endif()
 
 set_property(TARGET progressia PROPERTY CXX_STANDARD 17)
 set_property(TARGET progressia PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # Do Windows-specific tweaks for release builds
-if (WIN32 AND DEFINED BUILD_ID)
+if (WIN32 AND NOT BUILD_ID STREQUAL "dev")
     set_target_properties(progressia PROPERTIES WIN32_EXECUTABLE true)
 
-    if (gcc_like_compiler)
+    if (compiler_cl_dialect STREQUAL "GCC")
         target_link_options(progressia PRIVATE -static-libstdc++ -static-libgcc)
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    elseif (compiler_cl_dialect STREQUAL "MSVC")
         target_link_options(progressia PRIVATE /entry:mainCRTStartup)
         message(WARNING "Release builds with MSVC are not supported")
     endif()
-endif()
-
-# Extra options for gcc -- we're using this for extra static analisys for now
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(progressia PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 
 # Pass configuration options
