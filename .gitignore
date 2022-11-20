@@ -10,5 +10,10 @@ tools/private.sh
 # Prevent anyone from accidentally uploading CMakeFiles
 CMakeFiles
 
+# Visual Studio garbage
+.vs
+CMakeSettings.json
+out
+
 # Some weirdos use Kate
 *.kate-swp
