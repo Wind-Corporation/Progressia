@@ -2,6 +2,24 @@ cmake_minimum_required(VERSION 3.12)
 
 project(progressia)
 set(VERSION "0.0.1")
+add_executable(progressia)
+
+# Options
+
+option(DEV_MODE "Enable additional functionality required for development.")
+
+string(CONCAT BUILD_ID_expl
+    "Build ID or \"dev\".\n"
+    "Set to a unique identifying string if you intend to publish your builds.")
+set(BUILD_ID "dev" CACHE STRING "${BUILD_ID_expl}")
+
+string(CONCAT VULKAN_ERROR_CHECKING_expl
+    "Enable Vulkan validation layers to detect Vulkan API usage errors "
+    "at runtime.\n"
+    "Requires Vulkan SDK. This will lead to decreased performance.")
+option(VULKAN_ERROR_CHECKING "${VULKAN_ERROR_CHECKING_expl}")
+
+# Tools
 
 set(tools ${PROJECT_SOURCE_DIR}/tools)
 set(generated ${PROJECT_BINARY_DIR}/generated)
@@ -10,13 +28,10 @@ file(MAKE_DIRECTORY "${generated}")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/tools/")
 include(embed/embed)
 include(glslc)
-
-# Options
-option(BUILD_ID "Build ID. Set to \"dev\" unless building a release that you intend to publish" "dev")
-option(VULKAN_ERROR_CHECKING "Enable Vulkan validation layers to detect Vulkan API usage errors at runtime")
+include(clang-tidy/clang-tidy)
 
 # Source files
-add_executable(progressia
+target_sources(progressia PRIVATE
     desktop/main.cpp
     desktop/graphics/glfw_mgmt.cpp
     desktop/graphics/vulkan_common.cpp
@@ -51,6 +66,9 @@ target_include_directories(progressia PRIVATE ${generated}/embedded_resources)
 
 # Compilation settings
 
+set_property(TARGET progressia PROPERTY CXX_STANDARD 17)
+set_property(TARGET progressia PROPERTY CXX_STANDARD_REQUIRED ON)
+
 # Determine command line style
 if (DEFINED compiler_cl_dialect)
     # Do nothing
@@ -72,9 +90,6 @@ else()
     message(WARNING "Could not determine compiler command line dialect, guessing GCC")
     set(compiler_cl_dialect "GCC")
 endif()
-
-set_property(TARGET progressia PROPERTY CXX_STANDARD 17)
-set_property(TARGET progressia PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # Do Windows-specific tweaks for release builds
 if (WIN32 AND NOT BUILD_ID STREQUAL "dev")
