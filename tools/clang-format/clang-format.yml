@@ -2,3 +2,6 @@ BasedOnStyle: LLVM
 
 # Use larger indentation
 IndentWidth: 4
+
+# clang-tidy suppression markers
+CommentPragmas: 'NOLINT'
