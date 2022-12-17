@@ -3,5 +3,6 @@ Checks: "-*,\
   cppcoreguidelines-*,\
   modernize-*,\
   performance-*,\
-  readability-*"
+  readability-*,\
+  clang-diagnostic-*"
 
