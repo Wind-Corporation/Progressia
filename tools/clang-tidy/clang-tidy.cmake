@@ -18,7 +18,7 @@ if (DEV_MODE)
         "Clang-tidy is enabled (this is a marker for pre-commit.py)")
     
     # Notify pre-commit.py about CMAKE_BINARY_DIR
-    execute_process(COMMAND ${Python3_EXECUTABLE} ${tools}/tools/pre-commit.py
+    execute_process(COMMAND ${Python3_EXECUTABLE} ${tools}/pre-commit.py
             set-build-root -- "${CMAKE_BINARY_DIR}"
             RESULT_VARIABLE set_build_root_RESULT)
     
