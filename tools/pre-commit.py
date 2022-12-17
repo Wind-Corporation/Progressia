@@ -186,9 +186,11 @@ def unformat_project(indexed):
 def build_project():
     """Build project with cmake."""
     print('Building project')
-    build_log = invoke(*cmake, '--build', build_root, '--parallel', parallelism,
-           result_when_dry=CLANG_TIDY_CHECK_MARKER,
-           quiet=False)
+    build_log = invoke(*cmake,
+                       '--build', build_root,
+                       '--parallel', str(parallelism),
+                       result_when_dry=CLANG_TIDY_CHECK_MARKER,
+                       quiet=False)
     
     if CLANG_TIDY_CHECK_MARKER not in build_log.splitlines():
         fail('Project build was successful, but clang-tidy did not run. '
