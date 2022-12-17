@@ -251,16 +251,21 @@ def get_settings_path():
                                         SETTINGS_PATH))
 
 
-def set_build_root():
-    """Set last build root in tools/pre-commit-settings.json."""
-    path = get_settings_path()
-    verbose(f"Updating {path}")
+def save_settings():
+    """Save tools/pre-commit-settings.json."""
+    verbose(f"Saving settings into {path}")
     if not dry_run:
         settings['build_root'] = arg_build_root
         with open(path, mode='w') as f:
             json.dump(settings, f, indent=4)
     else:
         verbose('  skipped: --dry-run')
+
+
+def set_build_root():
+    """Set last build root in tools/pre-commit-settings.json."""
+    path = get_settings_path()
+    save_settings()
 
 
 def parse_args():
@@ -337,6 +342,7 @@ def load_settings():
             "clang_format_diff": None,
             "parallelism": 1
         }
+        save_settings()
     
     build_root = settings['build_root']
     parallelism = settings['parallelism']
