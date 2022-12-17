@@ -253,9 +253,9 @@ def get_settings_path():
 
 def save_settings():
     """Save tools/pre-commit-settings.json."""
+    path = get_settings_path()
     verbose(f"Saving settings into {path}")
     if not dry_run:
-        settings['build_root'] = arg_build_root
         with open(path, mode='w') as f:
             json.dump(settings, f, indent=4)
     else:
@@ -264,7 +264,7 @@ def save_settings():
 
 def set_build_root():
     """Set last build root in tools/pre-commit-settings.json."""
-    path = get_settings_path()
+    settings['build_root'] = arg_build_root
     save_settings()
 
 
