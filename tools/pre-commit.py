@@ -347,7 +347,7 @@ def load_settings():
         
         cmds = (hint.split(';') for hint in hints)
         res = next((cmd for cmd in cmds if shutil.which(cmd[0])), None) \
-            or fail(f"Command {hints[0]} not found. Set {env_name} " +
+            or fail(f"Command {hints[0]} not found. Set {settings_name} " +
                     f"in {path} or check PATH")
         
         verbose(f"Found command {hints[0]}:", *(repr(c) for c in res))
