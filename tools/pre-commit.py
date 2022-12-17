@@ -219,6 +219,7 @@ def pre_commit():
     run_safety_checks(indexed, unindexed)
 
     undo_formatting = False
+    restore = False
     try:
         if len(unindexed) != 0:
             long_print_iter('Unindexed changes found in files', unindexed)
