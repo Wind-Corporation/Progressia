@@ -218,6 +218,10 @@ def pre_commit():
     if verbose_mode:
         long_print_iter('Indexed changes', indexed)
         long_print_iter('Unindexed changes', unindexed)
+    
+    if len(indexed) == 0:
+        fail('No indexed changes. You probably forgot to run `git add .`')
+    
     run_safety_checks(indexed, unindexed)
 
     undo_formatting = False
