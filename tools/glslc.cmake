@@ -2,7 +2,7 @@
 # Compiles GLSL shaders to SPV files
 
 find_package(Vulkan COMPONENTS glslc REQUIRED)
-find_program(glslc_EXECUTABLE NAMES glslc HINTS Vulkan::glslc)
+find_program(glslc_EXECUTABLE NAMES glslc HINTS Vulkan::glslc REQUIRED)
 
 macro (get_target_property_or var target prop default)
     get_property(__is_set TARGET ${target} PROPERTY ${prop} SET)

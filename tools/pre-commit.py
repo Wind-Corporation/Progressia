@@ -3,10 +3,10 @@
 usage = \
 '''Usage: %(me)s run [OPTIONS...]
   or:  %(me)s restore [OPTIONS...]
-  or:  %(me)s set-build-root CMAKE_BINARY_DIR
+  or:  %(me)s set-build-info CMAKE_EXECUTABLE CMAKE_BINARY_DIR
 In the 1st form, run standard pre-commit procedure for Progressia.
 In the 2nd form, attempt to restore workspace if the pre-commit hook failed.
-In the 3rd form, only update git pre-commit hook.
+In the 3rd form, update cached build settings.
 
   --dry-run      do not change anything in git or in the filesystem;
                    implies --verbose
@@ -22,7 +22,7 @@ pre-commit-settings.json values:
   build-root         CMake binary dir to use (filled in by CMake)
   parallelism        threads to use, default is 1
   git                git command, default is null
-  cmake              cmake command, default is null
+  cmake              cmake command, default is null (filled in by CMake)
   clang-format-diff  clang-format-diff command, default is null
 
 Use semicolons to separate arguments in git, cmake and clang-format-diff'''
@@ -49,8 +49,8 @@ STASH_NAME = 'progressia_pre_commit_stash'
 # Paths are relative to this script's directory, tools/
 SETTINGS_PATH = 'pre-commit-settings.json'
 CLANG_FORMAT_PATH = 'clang-format/clang-format.json'
-CLANG_TIDY_CHECK_MARKER = 'Clang-tidy is enabled ' \
-                          '(this is a marker for pre-commit.py)'
+CLANG_TIDY_CHECK_MARKER = 'Clang-tidy is enabled. ' \
+                          'This is a marker for pre-commit.py'
 
 
 def fail(*args, code=1):
@@ -265,15 +265,16 @@ def save_settings():
         verbose('  skipped: --dry-run')
 
 
-def set_build_root():
-    """Set last build root in tools/pre-commit-settings.json."""
+def set_build_info():
+    """Set build info in tools/pre-commit-settings.json."""
     settings['build_root'] = arg_build_root
+    settings['cmake'] = arg_cmake_executable
     save_settings()
 
 
 def parse_args():
     """Parse sys.argv and environment variables; set corresponding globals.
-    Return (action, argument for set-build-root).
+    Return (action, arguments for set-build-root).
     """
     global action
     global verbose_mode
@@ -282,10 +283,11 @@ def parse_args():
     
     consider_options = True
     action = None
+    arg_cmake_executable = None
     arg_build_root = None
     
     for arg in sys.argv[1:]:
-        if arg == 'restore' or arg == 'set-build-root' or arg == 'run':
+        if arg == 'restore' or arg == 'set-build-info' or arg == 'run':
             if action is not None:
                 fail(f"Cannot use '{arg}' and '{action}' together")
             action = arg
@@ -305,21 +307,23 @@ def parse_args():
                 consider_options = False
             else:
                 fail(f"Unknown option '{arg}'")
-        elif action == 'set-build-root' and arg_build_root is None:
+        elif action == 'set-build-info' and arg_cmake_executable is None:
+            arg_cmake_executable = arg
+        elif action == 'set-build-info' and arg_build_root is None:
             arg_build_root = arg
         else:
             fail(f"Unknown or unexpected argument '{arg}'")
     
-    if not allow_update and action == 'update':
-        fail("Cannot use '--dont-update' and 'update' together")
-    
     if action is None:
         fail('No action specified')
+        
+    if action == 'set-build-info' and arg_cmake_executable is None:
+        fail('No CMake executable given')
     
-    if action == 'set-build-root' and arg_build_root is None:
-        fail('No path given')
+    if action == 'set-build-info' and arg_build_root is None:
+        fail('No build root given')
     
-    return action, arg_build_root
+    return action, arg_build_root, arg_cmake_executable
 
 
 def load_settings():
@@ -376,7 +380,7 @@ if __name__ == '__main__':
     dry_run = False
     allow_update = True
     
-    action, arg_build_root = parse_args()
+    action, arg_build_root, arg_cmake_executable = parse_args()
     load_settings()
     
     if dry_run:
@@ -384,8 +388,8 @@ if __name__ == '__main__':
               'actually be performed')
     
     try:
-        if action == 'set-build-root':
-            set_build_root()
+        if action == 'set-build-info':
+            set_build_info()
         elif action == 'restore':
             do_restore()
             indexed, unindexed = get_file_sets()
