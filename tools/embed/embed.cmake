@@ -1,9 +1,6 @@
 # embed.cmake
 # Generates embedded_resources.h and embedded_resources.cpp
 
-find_package(Vulkan COMPONENTS glslc REQUIRED)
-find_program(glslc_EXECUTABLE NAMES glslc HINTS Vulkan::glslc)
-
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
 macro (get_target_property_or var target prop default)

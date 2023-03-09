@@ -8,6 +8,8 @@
 
 #include "stb/stb_image.h"
 
+#include <embedded_resources.h>
+
 #include "../logging.h"
 using namespace progressia::main::logging;
 
@@ -20,23 +22,19 @@ const Image::Byte *Image::getData() const { return data.data(); }
 
 Image::Byte *Image::getData() { return data.data(); }
 
-Image loadImage(const std::filesystem::path &path) {
+Image loadImage(const std::string &path) {
 
-    std::ifstream file(path, std::ios::ate | std::ios::binary);
+    auto resource = __embedded_resources::getEmbeddedResource(path.c_str());
 
-    if (!file.is_open()) {
-        fatal() << "Could not access a PNG image in file " << path;
+    if (resource.data == nullptr) {
         // REPORT_ERROR
+        progressia::main::logging::fatal()
+            << "Could not find resource \"" << path << "\"";
         exit(1);
     }
 
-    std::size_t fileSize = static_cast<std::size_t>(file.tellg());
-    std::vector<Image::Byte> png(fileSize);
-
-    file.seekg(0);
-    file.read(reinterpret_cast<char *>(png.data()), fileSize);
-
-    file.close();
+    std::vector<Image::Byte> png(resource.data,
+                                 resource.data + resource.length);
 
     int width;
     int height;

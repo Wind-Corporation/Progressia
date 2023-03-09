@@ -60,6 +60,11 @@ target_sources(progressia PRIVATE
 target_glsl_shaders(progressia
     desktop/graphics/shaders/shader.frag
     desktop/graphics/shaders/shader.vert)
+
+target_embeds(progressia
+    assets/texture.png
+    assets/texture2.png)
+
 compile_glsl(progressia)
 compile_embeds(progressia)
 target_include_directories(progressia PRIVATE ${generated}/embedded_resources)

@@ -63,10 +63,10 @@ void initialize(GraphicsInterface &gintp) {
     debug("game init begin");
     gint = &gintp;
 
-    texture1.reset(gint->newTexture(
-        progressia::main::loadImage(u"../assets/texture.png")));
-    texture2.reset(gint->newTexture(
-        progressia::main::loadImage(u"../assets/texture2.png")));
+    texture1.reset(
+        gint->newTexture(progressia::main::loadImage("assets/texture.png")));
+    texture2.reset(
+        gint->newTexture(progressia::main::loadImage("assets/texture2.png")));
 
     // Cube 1
     {

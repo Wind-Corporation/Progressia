@@ -19,7 +19,7 @@ class Image {
     Byte *getData();
 };
 
-Image loadImage(const std::filesystem::path &);
+Image loadImage(const std::string &);
 
 } // namespace main
 } // namespace progressia
