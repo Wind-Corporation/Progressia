@@ -1,6 +1,6 @@
 #pragma once
 
-#include "boost/core/noncopyable.hpp"
+#include "util.h"
 #include <ostream>
 
 namespace progressia {
@@ -8,7 +8,7 @@ namespace main {
 
 namespace detail {
 
-class LogSink : private boost::noncopyable {
+class LogSink : private progressia::main::NonCopyable {
   private:
     bool isCurrentSink;
 

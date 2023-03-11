@@ -17,7 +17,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
-#include <boost/core/noncopyable.hpp>
+#include "../../main/util.h"
 
 #include "../../main/logging.h"
 #include "../../main/rendering/graphics_interface.h"
@@ -54,7 +54,7 @@ struct CstrCompare {
 using CstrHashSet = std::unordered_set<const char *, CstrHash, CstrEqual>;
 } // namespace CstrUtils
 
-class VkObjectWrapper : private boost::noncopyable {
+class VkObjectWrapper : private progressia::main::NonCopyable {
     // empty
 };
 

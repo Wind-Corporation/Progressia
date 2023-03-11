@@ -131,7 +131,3 @@ target_link_libraries(progressia glm::glm)
 # Use STB
 target_include_directories(progressia PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/stb/include)
-
-# Use Boost
-find_package(Boost 1.74 REQUIRED)
-target_link_libraries(progressia Boost::headers)

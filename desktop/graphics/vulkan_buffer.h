@@ -1,6 +1,5 @@
 #pragma once
 
-#include <boost/core/noncopyable.hpp>
 #include <vector>
 
 #include "vulkan_common.h"

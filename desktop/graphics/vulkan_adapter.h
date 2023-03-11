@@ -1,6 +1,5 @@
 #pragma once
 
-#include "boost/core/noncopyable.hpp"
 #include "vulkan_common.h"
 #include "vulkan_descriptor_set.h"
 #include "vulkan_image.h"

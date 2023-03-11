@@ -1,6 +1,6 @@
 #pragma once
 
-#include "boost/core/noncopyable.hpp"
+#include "../util.h"
 #include <vector>
 
 #define GLM_FORCE_RADIANS
@@ -25,7 +25,7 @@ struct Vertex {
     glm::vec2 texCoord;
 };
 
-class Texture : private boost::noncopyable {
+class Texture : private progressia::main::NonCopyable {
   public:
     using Backend = void *;
 
@@ -39,7 +39,7 @@ class Texture : private boost::noncopyable {
     ~Texture();
 };
 
-class Primitive : private boost::noncopyable {
+class Primitive : private progressia::main::NonCopyable {
   public:
     using Backend = void *;
 
@@ -57,7 +57,7 @@ class Primitive : private boost::noncopyable {
     const Texture *getTexture() const;
 };
 
-class View : private boost::noncopyable {
+class View : private progressia::main::NonCopyable {
   public:
     using Backend = void *;
 
@@ -72,7 +72,7 @@ class View : private boost::noncopyable {
     void use();
 };
 
-class Light : private boost::noncopyable {
+class Light : private progressia::main::NonCopyable {
   public:
     using Backend = void *;
 
@@ -88,7 +88,7 @@ class Light : private boost::noncopyable {
     void use();
 };
 
-class GraphicsInterface : private boost::noncopyable {
+class GraphicsInterface : private progressia::main::NonCopyable {
   public:
     using Backend = void *;
 

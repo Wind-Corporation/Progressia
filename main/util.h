@@ -28,3 +28,15 @@
     };                                        \
 }
 // clang-format on
+
+namespace progressia {
+namespace main {
+
+struct NonCopyable {
+    NonCopyable &operator=(const NonCopyable &) = delete;
+    NonCopyable(const NonCopyable &) = delete;
+    NonCopyable() = default;
+};
+
+} // namespace main
+} // namespace progressia
