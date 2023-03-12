@@ -46,9 +46,9 @@ class LogSinkBackend {
 namespace {
 std::ofstream openLogFile() {
     // FIXME this is relative to bin, not root dir
-    std::filesystem::create_directories("../run");
-    std::filesystem::create_directories("../run/logs");
-    return std::ofstream("../run/logs/latest.log");
+    std::filesystem::create_directories("run");
+    std::filesystem::create_directories("run/logs");
+    return std::ofstream("run/logs/latest.log");
 }
 } // namespace
 
