@@ -331,13 +331,8 @@ def parse_args():
 
 
 def load_settings():
-    """Load values from pre-commit-settings.json."""
+    """Ensure pre-commit-settings.json exists and is loaded into memory."""
     global settings
-    global build_root
-    global git
-    global cmake
-    global clang_format_diff
-    global parallelism
     
     path = get_settings_path()
     if os.path.exists(path):
@@ -354,6 +349,15 @@ def load_settings():
             "parallelism": 1
         }
         save_settings()
+
+def parse_settings():
+    """Load values from settings and check their validity."""
+    global settings
+    global build_root
+    global git
+    global cmake
+    global clang_format_diff
+    global parallelism
     
     build_root = settings['build_root']
     parallelism = settings['parallelism']
@@ -395,11 +399,13 @@ if __name__ == '__main__':
         if action == 'set-build-info':
             set_build_info()
         elif action == 'restore':
+            parse_settings()
             do_restore()
             indexed, unindexed = get_file_sets()
             if indexed & unindexed:
                 unformat_project(indexed)
         else:
+            parse_settings()
             pre_commit()
     except subprocess.CalledProcessError as e:
         fail('Command', *(repr(c) for c in e.cmd),
