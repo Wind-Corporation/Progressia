@@ -1,11 +1,7 @@
-#Checks: "-*,\
-#  clang-analyzer-*,\
-#  cppcoreguidelines-*,\
-#  modernize-*,\
-#  performance-*,\
-#  readability-*,\
-#  clang-diagnostic-*"
-
-# OH SO TEMPORARY
-# im gonna be mad BIG TIME if this makes it to a public repo
-Checks: "-*,clang-analyzer-webkit.NoUncountedMemberChecker"
+Checks: "-*,\
+  clang-analyzer-*,\
+  cppcoreguidelines-*,\
+  modernize-*,\
+  performance-*,\
+  readability-*,\
+  clang-diagnostic-*"
