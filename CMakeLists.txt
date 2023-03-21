@@ -104,7 +104,19 @@ if (WIN32 AND NOT BUILD_ID STREQUAL "dev")
         target_link_options(progressia PRIVATE -static-libstdc++ -static-libgcc)
     elseif (compiler_cl_dialect STREQUAL "MSVC")
         target_link_options(progressia PRIVATE /entry:mainCRTStartup)
-        message(WARNING "Release builds with MSVC are not supported")
+        
+        # The static linking options for standard libraries are not available for MSVC when using a GPLv3 license,
+        # as statically linking the standard C/C++ libraries would be a violation of the GPLv3 license.
+        # The GPL requires that any derivative work that includes GPL-licensed code must also be licensed under the GPL,
+        # and that the source code for the derivative work must be made available to anyone who receives the binary form.
+        # Statically linking the standard libraries with a GPLv3 license would create a derivative work,
+        # and would therefore require the entire program to be distributed under the terms of the GPL as well.
+        # To comply with the GPL, it is recommended to use shared library linking instead of static linking.
+        #
+        # Yours faithfully,
+        # ChatGPT
+        message(WARNING "Release builds with MSVC/Clang-CL are not supported")
+        
     endif()
 endif()
 
