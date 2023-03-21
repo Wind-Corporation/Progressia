@@ -26,8 +26,7 @@
 
 #include <embedded_resources.h>
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 using progressia::main::Vertex;
 
@@ -152,8 +151,8 @@ void Adapter::onPreFrame() {
  * graphics_interface implementation
  */
 
-} // namespace desktop
-namespace main {
+} // namespace progressia::desktop
+namespace progressia::main {
 
 using namespace progressia::desktop;
 
@@ -335,5 +334,4 @@ uint64_t GraphicsInterface::getLastStartedFrame() {
     return static_cast<Vulkan *>(this->backend)->getLastStartedFrame();
 }
 
-} // namespace main
-} // namespace progressia
+} // namespace progressia::main

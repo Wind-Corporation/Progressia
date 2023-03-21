@@ -12,8 +12,7 @@
 
 #include "image.h"
 
-namespace progressia {
-namespace main {
+namespace progressia::main {
 
 struct Vertex {
 
@@ -119,5 +118,4 @@ class GraphicsInterface : private progressia::main::NonCopyable {
     uint64_t getLastStartedFrame();
 };
 
-} // namespace main
-} // namespace progressia
+} // namespace progressia::main

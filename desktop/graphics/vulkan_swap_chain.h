@@ -3,8 +3,7 @@
 #include "vulkan_adapter.h"
 #include "vulkan_common.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 class SwapChain : public VkObjectWrapper {
 
@@ -54,5 +53,4 @@ class SwapChain : public VkObjectWrapper {
     VkExtent2D getExtent() const;
 };
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

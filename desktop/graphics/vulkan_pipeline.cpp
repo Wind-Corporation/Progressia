@@ -5,8 +5,7 @@
 #include "vulkan_descriptor_set.h"
 #include "vulkan_render_pass.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 Pipeline::Pipeline(Vulkan &vulkan) : vulkan(vulkan) {
 
@@ -219,5 +218,4 @@ VkPipeline Pipeline::getVk() { return vk; }
 
 VkPipelineLayout Pipeline::getLayout() { return layout; }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

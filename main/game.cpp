@@ -16,8 +16,7 @@
 #include "logging.h"
 using namespace progressia::main::logging;
 
-namespace progressia {
-namespace main {
+namespace progressia::main {
 
 std::unique_ptr<Primitive> cube1, cube2;
 std::unique_ptr<Texture> texture1, texture2;
@@ -178,5 +177,4 @@ void shutdown() {
     debug("game shutdown complete");
 }
 
-} // namespace main
-} // namespace progressia
+} // namespace progressia::main

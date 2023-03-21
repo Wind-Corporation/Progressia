@@ -3,8 +3,7 @@
 #include "vulkan_adapter.h"
 #include "vulkan_common.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 RenderPass::RenderPass(Vulkan &vulkan) : vulkan(vulkan) {
 
@@ -79,5 +78,4 @@ RenderPass::~RenderPass() {
 
 VkRenderPass RenderPass::getVk() { return vk; }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

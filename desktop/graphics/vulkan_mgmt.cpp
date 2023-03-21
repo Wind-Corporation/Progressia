@@ -6,8 +6,7 @@
 #include "../../main/logging.h"
 using namespace progressia::main::logging;
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 Vulkan *vulkan;
 
@@ -67,5 +66,4 @@ void shutdownVulkan() {
     debug("Vulkan terminated");
 }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

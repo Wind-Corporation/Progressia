@@ -5,8 +5,7 @@
 #include "vulkan_image.h"
 #include "vulkan_uniform.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 class Attachment {
   public:
@@ -67,5 +66,4 @@ class Adapter : public VkObjectWrapper {
     void onPreFrame();
 };
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

@@ -2,8 +2,7 @@
 
 #include "vulkan_common.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 void initializeVulkan();
 
@@ -19,5 +18,4 @@ void endRender();
 
 void shutdownVulkan();
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

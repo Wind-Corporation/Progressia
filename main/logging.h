@@ -3,8 +3,7 @@
 #include "util.h"
 #include <ostream>
 
-namespace progressia {
-namespace main {
+namespace progressia::main {
 
 namespace detail {
 
@@ -60,5 +59,4 @@ detail::LogSink fatal(const char *start = nullptr);
 void initializeLogging();
 void shutdownLogging();
 
-} // namespace main
-} // namespace progressia
+} // namespace progressia::main

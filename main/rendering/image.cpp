@@ -13,8 +13,7 @@
 #include "../logging.h"
 using namespace progressia::main::logging;
 
-namespace progressia {
-namespace main {
+namespace progressia::main {
 
 std::size_t Image::getSize() const { return data.size(); }
 
@@ -59,5 +58,4 @@ Image loadImage(const std::string &path) {
             data};
 }
 
-} // namespace main
-} // namespace progressia
+} // namespace progressia::main

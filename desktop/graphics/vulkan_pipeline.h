@@ -2,8 +2,7 @@
 
 #include "vulkan_common.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 class Pipeline : public VkObjectWrapper {
 
@@ -23,5 +22,4 @@ class Pipeline : public VkObjectWrapper {
     VkPipelineLayout getLayout();
 };
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

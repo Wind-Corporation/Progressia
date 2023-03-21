@@ -9,8 +9,7 @@
 #include "vulkan_pipeline.h"
 #include "vulkan_texture_descriptors.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 /*
  * Image
@@ -243,5 +242,4 @@ void Texture::bind() {
                             &descriptorSet, 0, nullptr);
 }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

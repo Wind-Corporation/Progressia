@@ -29,8 +29,7 @@
 }
 // clang-format on
 
-namespace progressia {
-namespace main {
+namespace progressia::main {
 
 struct NonCopyable {
     NonCopyable &operator=(const NonCopyable &) = delete;
@@ -38,5 +37,4 @@ struct NonCopyable {
     NonCopyable() = default;
 };
 
-} // namespace main
-} // namespace progressia
+} // namespace progressia::main

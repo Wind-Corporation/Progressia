@@ -5,12 +5,10 @@
 
 #include <vector>
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 const PhysicalDevice &
 pickPhysicalDevice(std::vector<PhysicalDevice> &, Vulkan &,
                    const std::vector<const char *> &deviceExtensions);
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

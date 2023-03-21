@@ -8,8 +8,7 @@
 #include "vulkan_common.h"
 #include "vulkan_descriptor_set.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 template <typename... Entries> class Uniform : public DescriptorSetInterface {
 
@@ -71,7 +70,6 @@ template <typename... Entries> class Uniform : public DescriptorSetInterface {
     void doUpdates();
 };
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop
 
 #include "vulkan_uniform.inl"

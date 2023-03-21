@@ -8,8 +8,7 @@
 #include "vulkan_render_pass.h"
 #include "vulkan_swap_chain.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 Frame::Frame(Vulkan &vulkan)
     : vulkan(vulkan),
@@ -170,5 +169,4 @@ void Frame::endRender() {
 
 VkCommandBuffer Frame::getCommandBuffer() { return commandBuffer; }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

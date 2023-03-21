@@ -7,8 +7,7 @@
 #include "vulkan_pipeline.h"
 #include "vulkan_physical_device.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 namespace detail {
 
@@ -206,5 +205,4 @@ template <typename... Entries> void Uniform<Entries...>::doUpdates() {
     }
 }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

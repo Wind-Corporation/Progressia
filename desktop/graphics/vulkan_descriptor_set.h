@@ -2,8 +2,7 @@
 
 #include "vulkan_common.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 class DescriptorSetInterface : public VkObjectWrapper {
   protected:
@@ -19,5 +18,4 @@ class DescriptorSetInterface : public VkObjectWrapper {
     Vulkan &getVulkan();
 };
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

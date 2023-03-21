@@ -22,8 +22,7 @@
 #include "../../main/logging.h"
 #include "../../main/rendering/graphics_interface.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 namespace CstrUtils {
 struct CstrHash {
@@ -288,5 +287,4 @@ class CommandPool : public VkObjectWrapper {
     void freeMultiUse(VkCommandBuffer);
 };
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

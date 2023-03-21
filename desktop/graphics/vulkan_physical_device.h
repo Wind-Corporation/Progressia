@@ -2,8 +2,7 @@
 
 #include "vulkan_common.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 class PhysicalDevice {
 
@@ -31,5 +30,4 @@ class PhysicalDevice {
     uint32_t getMaxTextureSize() const;
 };
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

@@ -11,8 +11,7 @@
 #include "vulkan_mgmt.h"
 using namespace progressia::main::logging;
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 static GLFWwindow *window = nullptr;
 
@@ -78,5 +77,4 @@ void onWindowGeometryChange(GLFWwindow *window, [[maybe_unused]] int width,
 
 GLFWwindow *getGLFWWindowHandle() { return window; }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

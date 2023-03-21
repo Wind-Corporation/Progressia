@@ -15,8 +15,7 @@
 
 using namespace progressia::main::logging;
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 /*
  * Vulkan
@@ -769,5 +768,4 @@ void CommandPool::freeMultiUse(VkCommandBuffer buffer) {
     vkFreeCommandBuffers(vulkan.getDevice(), pool, 1, &buffer);
 }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

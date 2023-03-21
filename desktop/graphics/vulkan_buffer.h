@@ -4,8 +4,7 @@
 
 #include "vulkan_common.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 /*
  * A single buffer with a chunk of allocated memory.
@@ -191,5 +190,4 @@ class IndexedBufferBase : public VkObjectWrapper {
 template <typename Vertex>
 using IndexedBuffer = IndexedBufferBase<Vertex, uint16_t, VK_INDEX_TYPE_UINT16>;
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

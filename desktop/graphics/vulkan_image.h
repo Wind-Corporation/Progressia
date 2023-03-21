@@ -7,8 +7,7 @@
 
 #include "../../main/rendering/image.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 class Image : public VkObjectWrapper {
   public:
@@ -55,5 +54,4 @@ class Texture : public ManagedImage {
     void bind();
 };
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

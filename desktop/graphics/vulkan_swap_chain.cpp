@@ -13,8 +13,7 @@
 #include "../../main/logging.h"
 using namespace progressia::main::logging;
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 SwapChain::SupportDetails
 SwapChain::querySwapChainSupport(VkPhysicalDevice device, Vulkan &vulkan) {
@@ -328,5 +327,4 @@ VkFramebuffer SwapChain::getFramebuffer(std::size_t index) const {
 
 VkExtent2D SwapChain::getExtent() const { return extent; }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

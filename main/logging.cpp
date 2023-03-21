@@ -8,8 +8,7 @@
 #include <mutex>
 #include <sstream>
 
-namespace progressia {
-namespace main {
+namespace progressia::main {
 
 namespace detail {
 
@@ -165,5 +164,4 @@ detail::LogSink fatal(const char *start) { return log(LogLevel::FATAL, start); }
 
 } // namespace logging
 
-} // namespace main
-} // namespace progressia
+} // namespace progressia::main

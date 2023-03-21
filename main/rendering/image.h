@@ -3,8 +3,7 @@
 #include <filesystem>
 #include <vector>
 
-namespace progressia {
-namespace main {
+namespace progressia::main {
 
 class Image {
   public:
@@ -21,5 +20,4 @@ class Image {
 
 Image loadImage(const std::string &);
 
-} // namespace main
-} // namespace progressia
+} // namespace progressia::main

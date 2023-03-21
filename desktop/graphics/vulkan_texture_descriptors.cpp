@@ -1,7 +1,6 @@
 #include "vulkan_texture_descriptors.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 void TextureDescriptors::allocatePool() {
     pools.resize(pools.size() + 1);
@@ -102,5 +101,4 @@ VkDescriptorSet TextureDescriptors::addTexture(VkImageView view,
     return descriptorSet;
 }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

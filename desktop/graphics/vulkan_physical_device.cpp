@@ -1,7 +1,6 @@
 #include "vulkan_physical_device.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 PhysicalDevice::PhysicalDevice(VkPhysicalDevice vk) : vk(vk) {
     vkGetPhysicalDeviceProperties(vk, &properties);
@@ -47,5 +46,4 @@ uint32_t PhysicalDevice::getMaxTextureSize() const {
     return getLimits().maxImageDimension2D;
 }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

@@ -2,12 +2,10 @@
 
 #include "rendering.h"
 
-namespace progressia {
-namespace main {
+namespace progressia::main {
 
 void initialize(GraphicsInterface &);
 void renderTick();
 void shutdown();
 
-} // namespace main
-} // namespace progressia
+} // namespace progressia::main

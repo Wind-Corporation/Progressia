@@ -4,8 +4,7 @@
 #include "vulkan_swap_chain.h"
 using namespace progressia::main::logging;
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 namespace {
 
@@ -99,5 +98,4 @@ pickPhysicalDevice(std::vector<PhysicalDevice> &choices, Vulkan &vulkan,
     return *pick;
 }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop
