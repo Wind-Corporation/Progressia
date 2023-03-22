@@ -17,3 +17,6 @@ out
 
 # Some weirdos use Kate
 *.kate-swp
+
+# Real creeps use KDevelop
+*.kdev*
