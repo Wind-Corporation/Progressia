@@ -135,8 +135,8 @@ class Vulkan : public VkObjectWrapper {
     bool startRender();
     void endRender();
 
-    uint64_t getLastStartedFrame();
-    std::size_t getFrameInFlightIndex();
+    uint64_t getLastStartedFrame() const;
+    std::size_t getFrameInFlightIndex() const;
 
     void waitIdle();
 
@@ -192,12 +192,13 @@ class VulkanErrorHandler : public VkObjectWrapper {
     Vulkan &vulkan;
 
   public:
-    VulkanErrorHandler(Vulkan &);
+    VulkanErrorHandler(Vulkan &vulkan);
 
     std::unique_ptr<VkDebugUtilsMessengerCreateInfoEXT>
     attachDebugProbe(VkInstanceCreateInfo &);
     void onInstanceReady();
 
+    // NOLINTNEXTLINE(performance-trivially-destructible): fixing this makes code less readable due to use of macros in implementation
     ~VulkanErrorHandler();
 
     void handleVkResult(const char *errorMessage, VkResult result);
@@ -209,7 +210,7 @@ class Surface : public VkObjectWrapper {
     Vulkan &vulkan;
 
   public:
-    Surface(Vulkan &);
+    Surface(Vulkan &vulkan);
     ~Surface();
 
     VkSurfaceKHR getVk();
@@ -226,7 +227,7 @@ class Queue {
 
     friend class Queues;
 
-    Queue(Test);
+    Queue(Test test);
 
   public:
     bool isSuitable(VkPhysicalDevice, uint32_t familyIndex, Vulkan &,
@@ -275,7 +276,7 @@ class CommandPool : public VkObjectWrapper {
                             VkCommandBufferUsageFlags usage);
 
   public:
-    CommandPool(Vulkan &, const Queue &);
+    CommandPool(Vulkan &vulkan, const Queue &queue);
     ~CommandPool();
 
     VkCommandBuffer beginSingleUse();

@@ -13,6 +13,7 @@ using namespace progressia::main::logging;
 
 namespace progressia::desktop {
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables): global variable required for GLFW callbacks
 static GLFWwindow *window = nullptr;
 
 static void onGlfwError(int errorCode, const char *description);
@@ -42,7 +43,9 @@ void initializeGlfw() {
         title = accumulator.str();
     }
 
-    window = glfwCreateWindow(800, 800, title.c_str(), nullptr, nullptr);
+    constexpr auto windowDimensions = 800;
+    window = glfwCreateWindow(windowDimensions, windowDimensions, title.c_str(),
+                              nullptr, nullptr);
 
     glfwSetWindowSizeCallback(window, onWindowGeometryChange);
 

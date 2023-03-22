@@ -4,4 +4,38 @@ Checks: "-*,\
   modernize-*,\
   performance-*,\
   readability-*,\
-  clang-diagnostic-*"
+  clang-diagnostic-*,\
+  -modernize-use-trailing-return-type,\
+  -readability-implicit-bool-conversion,\
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
+  -cppcoreguidelines-pro-type-reinterpret-cast,\
+  -cppcoreguidelines-pro-bounds-constant-array-index,\
+  -readability-else-after-return,\
+  -readability-named-parameter,\
+  -readability-use-anyofallof"
+
+# modernize-use-trailing-return-type
+#   ignore reason: reduces readability
+
+# readability-implicit-bool-conversion
+#   ignore reason: expected use by C libraries (GLFW, Vulkan API)
+
+# cppcoreguidelines-pro-bounds-array-to-pointer-decay
+#   ignore reason: expected use by C libraries
+
+# cppcoreguidelines-pro-type-reinterpret-cast
+#   ignore reason: expected use by C libraries
+
+# cppcoreguidelines-pro-bounds-constant-array-index
+#   ignore reason: infeasible to avoid without GSL
+
+# readability-else-after-return
+#   ignore reason: personal preference of OLEGSHA (using 'else' helps highlight
+#   branches in code)
+
+# readability-named-parameter
+#   ignore reason: using GCC convention is clear enough
+
+# readability-use-anyofallof
+#   ignore reason: these relatively obscure functions reduce readability by
+#   increasing code complexity and verbosity
