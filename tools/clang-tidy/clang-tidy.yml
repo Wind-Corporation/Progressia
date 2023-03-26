@@ -10,6 +10,7 @@ Checks: "-*,\
   -cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
   -cppcoreguidelines-pro-type-reinterpret-cast,\
   -cppcoreguidelines-pro-bounds-constant-array-index,\
+  -*-avoid-c-arrays,\
   -readability-else-after-return,\
   -readability-named-parameter,\
   -readability-use-anyofallof"
@@ -28,6 +29,9 @@ Checks: "-*,\
 
 # cppcoreguidelines-pro-bounds-constant-array-index
 #   ignore reason: infeasible to avoid without GSL
+
+# *-avoid-c-arrays
+#   ignore reason: often makes code significantly more verbose
 
 # readability-else-after-return
 #   ignore reason: personal preference of OLEGSHA (using 'else' helps highlight
