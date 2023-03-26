@@ -13,8 +13,8 @@ int main(int argc, char *argv[]) {
     using namespace progressia;
 
     for (int i = 1; i < argc; i++) {
-        char *arg = argv
-            [i]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic): infeasible to avoid in C++17
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic): infeasible to avoid in C++17
+        char *arg = argv[i];
         if (strcmp(arg, "--version") == 0 || strcmp(arg, "-v") == 0) {
             std::cout << main::meta::NAME << " " << main::meta::VERSION << "+"
                       << main::meta::BUILD_ID << " (version number "
