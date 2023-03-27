@@ -13,7 +13,7 @@ bool checkDeviceExtensions(VkPhysicalDevice device,
     CstrUtils::CstrHashSet toFind(deviceExtensions.cbegin(),
                                   deviceExtensions.cend());
 
-    uint32_t extensionCount;
+    uint32_t extensionCount = 0;
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount,
                                          nullptr);
 
