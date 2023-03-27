@@ -4,7 +4,7 @@ namespace progressia::desktop {
 
 DescriptorSetInterface::DescriptorSetInterface(uint32_t setNumber,
                                                Vulkan &vulkan)
-    : setNumber(setNumber), vulkan(vulkan) {}
+    : layout(), setNumber(setNumber), vulkan(vulkan) {}
 
 VkDescriptorSetLayout DescriptorSetInterface::getLayout() const {
     return layout;
