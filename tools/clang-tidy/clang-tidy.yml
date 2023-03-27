@@ -13,7 +13,8 @@ Checks: "-*,\
   -*-avoid-c-arrays,\
   -readability-else-after-return,\
   -readability-named-parameter,\
-  -readability-use-anyofallof"
+  -readability-use-anyofallof,\
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic"
 
 # modernize-use-trailing-return-type
 #   ignore reason: reduces readability
@@ -43,3 +44,6 @@ Checks: "-*,\
 # readability-use-anyofallof
 #   ignore reason: these relatively obscure functions reduce readability by
 #   increasing code complexity and verbosity
+
+# cppcoreguidelines-pro-bounds-pointer-arithmetic
+#   ignore reason: infeasible to avoid in C++17

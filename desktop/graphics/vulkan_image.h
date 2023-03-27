@@ -35,8 +35,9 @@ class ManagedImage : public Image {
     State state;
 
   public:
-    ManagedImage(std::size_t width, std::size_t height, VkFormat,
-                 VkImageAspectFlags, VkImageUsageFlags, Vulkan &);
+    ManagedImage(std::size_t width, std::size_t height, VkFormat format,
+                 VkImageAspectFlags aspect, VkImageUsageFlags usage,
+                 Vulkan &vulkan);
     ~ManagedImage();
 
     void transition(State);
@@ -48,7 +49,7 @@ class Texture : public ManagedImage {
     VkSampler sampler;
     VkDescriptorSet descriptorSet;
 
-    Texture(const progressia::main::Image &, Vulkan &vulkan);
+    Texture(const main::Image &src, Vulkan &vulkan);
     ~Texture();
 
     void bind();

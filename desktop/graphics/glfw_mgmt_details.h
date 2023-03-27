@@ -7,6 +7,7 @@
 
 namespace progressia::desktop {
 
+// TODO refactor into OOP
 GLFWwindow *getGLFWWindowHandle();
 
 } // namespace progressia::desktop

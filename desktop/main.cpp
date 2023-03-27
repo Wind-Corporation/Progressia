@@ -13,7 +13,6 @@ int main(int argc, char *argv[]) {
     using namespace progressia;
 
     for (int i = 1; i < argc; i++) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic): infeasible to avoid in C++17
         char *arg = argv[i];
         if (strcmp(arg, "--version") == 0 || strcmp(arg, "-v") == 0) {
             std::cout << main::meta::NAME << " " << main::meta::VERSION << "+"
@@ -28,30 +27,29 @@ int main(int argc, char *argv[]) {
            << main::meta::VERSION_NUMBER << ")";
     debug("Debug is enabled");
 
-    desktop::initializeGlfw();
-    desktop::initializeVulkan();
-    desktop::showWindow();
+    auto glfwManager = desktop::makeGlfwManager();
+    desktop::VulkanManager vulkanManager;
+    glfwManager->setOnScreenResize([&]() { vulkanManager.resizeSurface(); });
+    glfwManager->showWindow();
 
-    main::initialize(desktop::getVulkan()->getGint());
+    main::initialize(vulkanManager.getVulkan()->getGint());
 
     info("Loading complete");
-    while (desktop::shouldRun()) {
-        bool abortFrame = !desktop::startRender();
+    while (glfwManager->shouldRun()) {
+        bool abortFrame = !vulkanManager.startRender();
         if (abortFrame) {
             continue;
         }
 
         main::renderTick();
 
-        desktop::endRender();
-        desktop::doGlfwRoutine();
+        vulkanManager.endRender();
+        glfwManager->doGlfwRoutine();
     }
     info("Shutting down");
 
-    desktop::getVulkan()->waitIdle();
+    vulkanManager.getVulkan()->waitIdle();
     main::shutdown();
-    desktop::shutdownVulkan();
-    desktop::shutdownGlfw();
 
     return 0;
 }
