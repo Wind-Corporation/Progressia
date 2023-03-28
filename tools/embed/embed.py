@@ -237,8 +237,8 @@ namespace {
 
     mid=\
 '''
-    std::unordered_map<std::string,
-                       __embedded_resources::EmbeddedResource>
+    const std::unordered_map<std::string,
+                             __embedded_resources::EmbeddedResource>
     EMBEDDED_RESOURCES =
     {
 ''',
