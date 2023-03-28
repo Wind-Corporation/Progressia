@@ -2,12 +2,14 @@
 
 namespace progressia::desktop {
 
-PhysicalDevice::PhysicalDevice(VkPhysicalDevice vk) : vk(vk) {
+PhysicalDevice::PhysicalDevice(VkPhysicalDevice vk)
+    : vk(vk), properties(), features(), memory() {
     vkGetPhysicalDeviceProperties(vk, &properties);
     vkGetPhysicalDeviceFeatures(vk, &features);
     vkGetPhysicalDeviceMemoryProperties(vk, &memory);
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static): future-proofing
 bool PhysicalDevice::isSuitable() const {
     // Add feature, limit, etc. checks here.
     // Return false and debug() if problems arise.
