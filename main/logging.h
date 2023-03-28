@@ -23,7 +23,7 @@ class LogSink : private progressia::main::NonCopyable {
     LogSink(bool isCurrentSink);
     ~LogSink();
 
-    LogSink(LogSink &&);
+    LogSink(LogSink &&) noexcept;
 
     template <typename T>
     friend const LogSink &operator<<(const LogSink &sink, const T &x) {
