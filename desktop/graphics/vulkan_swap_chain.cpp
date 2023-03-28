@@ -18,12 +18,12 @@ namespace progressia::desktop {
 SwapChain::SupportDetails
 SwapChain::querySwapChainSupport(VkPhysicalDevice device, Vulkan &vulkan) {
     SupportDetails details;
-    auto surface = vulkan.getSurface().getVk();
+    auto *surface = vulkan.getSurface().getVk();
 
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface,
                                               &details.capabilities);
 
-    uint32_t formatCount;
+    uint32_t formatCount = 0;
     vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount,
                                          nullptr);
 
@@ -33,7 +33,7 @@ SwapChain::querySwapChainSupport(VkPhysicalDevice device, Vulkan &vulkan) {
                                              details.formats.data());
     }
 
-    uint32_t presentModeCount;
+    uint32_t presentModeCount = 0;
     vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface,
                                               &presentModeCount, nullptr);
 
@@ -189,6 +189,7 @@ void SwapChain::create() {
     }
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static): future-proofing
 VkSurfaceFormatKHR SwapChain::chooseSurfaceFormat(
     const std::vector<VkSurfaceFormatKHR> &supported) {
     for (const auto &option : supported) {
@@ -203,6 +204,7 @@ VkSurfaceFormatKHR SwapChain::chooseSurfaceFormat(
     exit(1);
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static): future-proofing
 bool SwapChain::isTripleBufferingSupported(
     const std::vector<VkPresentModeKHR> &supported) {
     return std::find(supported.begin(), supported.end(),
@@ -220,13 +222,15 @@ SwapChain::choosePresentMode(const std::vector<VkPresentModeKHR> &supported,
 }
 
 VkExtent2D
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static): future-proofing
 SwapChain::chooseExtent(const VkSurfaceCapabilitiesKHR &capabilities) {
     if (capabilities.currentExtent.width !=
         std::numeric_limits<uint32_t>::max()) {
         return capabilities.currentExtent;
     }
 
-    int width, height;
+    int width = 0;
+    int height = 0;
     glfwGetFramebufferSize(getGLFWWindowHandle(), &width, &height);
 
     VkExtent2D actualExtent = {static_cast<uint32_t>(width),
@@ -243,7 +247,7 @@ SwapChain::chooseExtent(const VkSurfaceCapabilitiesKHR &capabilities) {
 }
 
 void SwapChain::destroy() {
-    for (auto framebuffer : framebuffers) {
+    for (auto *framebuffer : framebuffers) {
         vkDestroyFramebuffer(vulkan.getDevice(), framebuffer, nullptr);
     }
     framebuffers.clear();
@@ -260,7 +264,7 @@ void SwapChain::destroy() {
         }
     }
 
-    for (auto colorBufferView : colorBufferViews) {
+    for (auto *colorBufferView : colorBufferViews) {
         vkDestroyImageView(vulkan.getDevice(), colorBufferView, nullptr);
     }
     colorBufferViews.clear();
@@ -272,9 +276,8 @@ void SwapChain::destroy() {
 }
 
 SwapChain::SwapChain(Vulkan &vulkan)
-    : vk(VK_NULL_HANDLE), colorBuffer(nullptr),
-      colorBufferViews(), extent{0, 0}, depthBuffer(nullptr), framebuffers(),
-      vulkan(vulkan) {
+    : vk(VK_NULL_HANDLE), colorBuffer(nullptr), extent{0, 0},
+      depthBuffer(nullptr), vulkan(vulkan) {
     auto details =
         querySwapChainSupport(vulkan.getPhysicalDevice().getVk(), vulkan);
     auto surfaceFormat = chooseSurfaceFormat(details.formats);
@@ -291,7 +294,7 @@ SwapChain::SwapChain(Vulkan &vulkan)
          VK_ATTACHMENT_LOAD_OP_CLEAR,
          VK_ATTACHMENT_STORE_OP_STORE,
 
-         {{{0.0f, 0.0f, 0.0f, 1.0f}}},
+         {{{0.0F, 0.0F, 0.0F, 1.0F}}},
 
          std::make_unique<Image>(static_cast<VkImage>(VK_NULL_HANDLE),
                                  static_cast<VkImageView>(VK_NULL_HANDLE),

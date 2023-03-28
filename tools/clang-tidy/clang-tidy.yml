@@ -16,7 +16,8 @@ Checks: "-*,\
   -readability-use-anyofallof,\
   -cppcoreguidelines-pro-bounds-pointer-arithmetic,\
   -performance-trivially-destructible,\
-  -modernize-make-unique"
+  -modernize-make-unique,\
+  -cppcoreguidelines-prefer-member-initializer"
 
 # modernize-use-trailing-return-type
 #   ignore reason: reduces readability
@@ -59,3 +60,6 @@ Checks: "-*,\
 #     std::unique_ptr<S>(new S { 1, 2 }) // works
 #     std::make_unique<S>(1, 2) // error
 #     std::make_unique<S>({1, 2}) // error
+
+# cppcoreguidelines-prefer-member-initializer
+#   ignore reason: rule fails to notice execution order dependencies
