@@ -62,10 +62,10 @@ void initialize(GraphicsInterface &gintp) {
     debug("game init begin");
     gint = &gintp;
 
-    texture1.reset(
-        gint->newTexture(progressia::main::loadImage("assets/texture.png")));
-    texture2.reset(
-        gint->newTexture(progressia::main::loadImage("assets/texture2.png")));
+    texture1 =
+        gint->newTexture(progressia::main::loadImage("assets/texture.png"));
+    texture2 =
+        gint->newTexture(progressia::main::loadImage("assets/texture2.png"));
 
     // Cube 1
     {
@@ -91,7 +91,7 @@ void initialize(GraphicsInterface &gintp) {
             c.normal = normal;
         }
 
-        cube1.reset(gint->newPrimitive(vertices, indices, &*texture1));
+        cube1 = gint->newPrimitive(vertices, indices, &*texture1);
     }
 
     // Cube 2
@@ -118,11 +118,11 @@ void initialize(GraphicsInterface &gintp) {
             c.normal = normal;
         }
 
-        cube2.reset(gint->newPrimitive(vertices, indices, &*texture2));
+        cube2 = gint->newPrimitive(vertices, indices, &*texture2);
     }
 
-    perspective.reset(gint->newView());
-    light.reset(gint->newLight());
+    perspective = gint->newView();
+    light = gint->newLight();
 
     debug("game init complete");
 }

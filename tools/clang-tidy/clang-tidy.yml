@@ -14,7 +14,9 @@ Checks: "-*,\
   -readability-else-after-return,\
   -readability-named-parameter,\
   -readability-use-anyofallof,\
-  -cppcoreguidelines-pro-bounds-pointer-arithmetic"
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,\
+  -performance-trivially-destructible,\
+  -modernize-make-unique"
 
 # modernize-use-trailing-return-type
 #   ignore reason: reduces readability
@@ -47,3 +49,13 @@ Checks: "-*,\
 
 # cppcoreguidelines-pro-bounds-pointer-arithmetic
 #   ignore reason: infeasible to avoid in C++17
+
+# performance-trivially-destructible
+#   ignore reason: breaks incapsulation too often
+
+# modernize-make-unique
+#   ignore reason: impossible with brace-init lists:
+#     struct S { int a; int b; };
+#     std::unique_ptr<S>(new S { 1, 2 }) // works
+#     std::make_unique<S>(1, 2) // error
+#     std::make_unique<S>({1, 2}) // error
