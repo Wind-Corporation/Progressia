@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     glfwManager->setOnScreenResize([&]() { vulkanManager.resizeSurface(); });
     glfwManager->showWindow();
 
-    main::initialize(vulkanManager.getVulkan()->getGint());
+    auto game = main::makeGame(vulkanManager.getVulkan()->getGint());
 
     info("Loading complete");
     while (glfwManager->shouldRun()) {
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        main::renderTick();
+        game->renderTick();
 
         vulkanManager.endRender();
         glfwManager->doGlfwRoutine();
@@ -49,7 +49,6 @@ int main(int argc, char *argv[]) {
     info("Shutting down");
 
     vulkanManager.getVulkan()->waitIdle();
-    main::shutdown();
 
     return 0;
 }

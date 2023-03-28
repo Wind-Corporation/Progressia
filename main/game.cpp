@@ -18,163 +18,179 @@ using namespace progressia::main::logging;
 
 namespace progressia::main {
 
-std::unique_ptr<Primitive> cube1, cube2;
-std::unique_ptr<Texture> texture1, texture2;
-std::unique_ptr<View> perspective;
-std::unique_ptr<Light> light;
+class GameImpl : public Game {
 
-GraphicsInterface *gint;
+    DISABLE_COPYING(GameImpl)
+    DISABLE_MOVING(GameImpl)
 
-void addRect(glm::vec3 origin, glm::vec3 width, glm::vec3 height,
-             glm::vec4 color, std::vector<Vertex> &vertices,
-             std::vector<Vertex::Index> &indices) {
+  public:
+    std::unique_ptr<Primitive> cube1;
+    std::unique_ptr<Primitive> cube2;
+    std::unique_ptr<Texture> texture1;
+    std::unique_ptr<Texture> texture2;
+    std::unique_ptr<View> perspective;
+    std::unique_ptr<Light> light;
 
-    Vertex::Index offset = vertices.size();
+    GraphicsInterface *gint;
 
-    vertices.push_back({origin, color, {}, {0, 0}});
-    vertices.push_back({origin + width, color, {}, {0, 1}});
-    vertices.push_back({origin + width + height, color, {}, {1, 1}});
-    vertices.push_back({origin + height, color, {}, {1, 0}});
+    static void addRect(glm::vec3 origin, glm::vec3 width, glm::vec3 height,
+                        glm::vec4 color, std::vector<Vertex> &vertices,
+                        std::vector<Vertex::Index> &indices) {
 
-    indices.push_back(offset + 0);
-    indices.push_back(offset + 1);
-    indices.push_back(offset + 2);
+        Vertex::Index offset = vertices.size();
 
-    indices.push_back(offset + 0);
-    indices.push_back(offset + 2);
-    indices.push_back(offset + 3);
-}
+        vertices.push_back({origin, color, {}, {0, 0}});
+        vertices.push_back({origin + width, color, {}, {0, 1}});
+        vertices.push_back({origin + width + height, color, {}, {1, 1}});
+        vertices.push_back({origin + height, color, {}, {1, 0}});
 
-void addBox(glm::vec3 origin, glm::vec3 length, glm::vec3 height,
-            glm::vec3 depth, std::array<glm::vec4, 6> colors,
-            std::vector<Vertex> &vertices,
-            std::vector<Vertex::Index> &indices) {
-    addRect(origin, height, length, colors[0], vertices, indices);
-    addRect(origin, length, depth, colors[1], vertices, indices);
-    addRect(origin, depth, height, colors[2], vertices, indices);
-    addRect(origin + height, depth, length, colors[3], vertices, indices);
-    addRect(origin + length, height, depth, colors[4], vertices, indices);
-    addRect(origin + depth, length, height, colors[5], vertices, indices);
-}
+        indices.push_back(offset + 0);
+        indices.push_back(offset + 1);
+        indices.push_back(offset + 2);
 
-void initialize(GraphicsInterface &gintp) {
+        indices.push_back(offset + 0);
+        indices.push_back(offset + 2);
+        indices.push_back(offset + 3);
+    }
 
-    debug("game init begin");
-    gint = &gintp;
+    static void addBox(glm::vec3 origin, glm::vec3 length, glm::vec3 height,
+                       glm::vec3 depth, std::array<glm::vec4, 6> colors,
+                       std::vector<Vertex> &vertices,
+                       std::vector<Vertex::Index> &indices) {
+        addRect(origin, height, length, colors[0], vertices, indices);
+        addRect(origin, length, depth, colors[1], vertices, indices);
+        addRect(origin, depth, height, colors[2], vertices, indices);
+        addRect(origin + height, depth, length, colors[3], vertices, indices);
+        addRect(origin + length, height, depth, colors[4], vertices, indices);
+        addRect(origin + depth, length, height, colors[5], vertices, indices);
+    }
 
-    texture1 =
-        gint->newTexture(progressia::main::loadImage("assets/texture.png"));
-    texture2 =
-        gint->newTexture(progressia::main::loadImage("assets/texture2.png"));
+    GameImpl(GraphicsInterface &gintp) {
 
-    // Cube 1
-    {
-        std::vector<Vertex> vertices;
-        std::vector<Vertex::Index> indices;
-        auto white = glm::vec4(1, 1, 1, 1);
+        debug("game init begin");
+        gint = &gintp;
 
-        addBox({-0.5, -0.5, -0.5}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1},
-               {white, white, white, white, white, white}, vertices, indices);
+        texture1 =
+            gint->newTexture(progressia::main::loadImage("assets/texture.png"));
+        texture2 = gint->newTexture(
+            progressia::main::loadImage("assets/texture2.png"));
 
-        for (std::size_t i = 0; i < indices.size(); i += 3) {
-            Vertex &a = vertices[indices[i + 0]];
-            Vertex &b = vertices[indices[i + 1]];
-            Vertex &c = vertices[indices[i + 2]];
+        // Cube 1
+        {
+            std::vector<Vertex> vertices;
+            std::vector<Vertex::Index> indices;
+            auto white = glm::vec4(1, 1, 1, 1);
 
-            glm::vec3 x = b.position - a.position;
-            glm::vec3 y = c.position - a.position;
+            addBox({-0.5, -0.5, -0.5}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1},
+                   {white, white, white, white, white, white}, vertices,
+                   indices);
 
-            glm::vec3 normal = glm::normalize(glm::cross(x, y));
+            for (std::size_t i = 0; i < indices.size(); i += 3) {
+                Vertex &a = vertices[indices[i + 0]];
+                Vertex &b = vertices[indices[i + 1]];
+                Vertex &c = vertices[indices[i + 2]];
 
-            a.normal = normal;
-            b.normal = normal;
-            c.normal = normal;
+                glm::vec3 x = b.position - a.position;
+                glm::vec3 y = c.position - a.position;
+
+                glm::vec3 normal = glm::normalize(glm::cross(x, y));
+
+                a.normal = normal;
+                b.normal = normal;
+                c.normal = normal;
+            }
+
+            cube1 = gint->newPrimitive(vertices, indices, &*texture1);
         }
 
-        cube1 = gint->newPrimitive(vertices, indices, &*texture1);
-    }
+        // Cube 2
+        {
+            std::vector<Vertex> vertices;
+            std::vector<Vertex::Index> indices;
+            auto white = glm::vec4(1, 1, 1, 1);
 
-    // Cube 2
-    {
-        std::vector<Vertex> vertices;
-        std::vector<Vertex::Index> indices;
-        auto white = glm::vec4(1, 1, 1, 1);
+            addBox({-0.5, -2.5, -0.5}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1},
+                   {white, white, white, white, white, white}, vertices,
+                   indices);
 
-        addBox({-0.5, -2.5, -0.5}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1},
-               {white, white, white, white, white, white}, vertices, indices);
+            for (std::size_t i = 0; i < indices.size(); i += 3) {
+                Vertex &a = vertices[indices[i + 0]];
+                Vertex &b = vertices[indices[i + 1]];
+                Vertex &c = vertices[indices[i + 2]];
 
-        for (std::size_t i = 0; i < indices.size(); i += 3) {
-            Vertex &a = vertices[indices[i + 0]];
-            Vertex &b = vertices[indices[i + 1]];
-            Vertex &c = vertices[indices[i + 2]];
+                glm::vec3 x = b.position - a.position;
+                glm::vec3 y = c.position - a.position;
 
-            glm::vec3 x = b.position - a.position;
-            glm::vec3 y = c.position - a.position;
+                glm::vec3 normal = glm::normalize(glm::cross(x, y));
 
-            glm::vec3 normal = glm::normalize(glm::cross(x, y));
+                a.normal = normal;
+                b.normal = normal;
+                c.normal = normal;
+            }
 
-            a.normal = normal;
-            b.normal = normal;
-            c.normal = normal;
+            cube2 = gint->newPrimitive(vertices, indices, &*texture2);
         }
 
-        cube2 = gint->newPrimitive(vertices, indices, &*texture2);
+        perspective = gint->newView();
+        light = gint->newLight();
+
+        debug("game init complete");
     }
 
-    perspective = gint->newView();
-    light = gint->newLight();
+    void renderTick() override {
 
-    debug("game init complete");
-}
+        {
+            float fov = 70.0F;
 
-void renderTick() {
+            auto extent = gint->getViewport();
+            auto proj = glm::perspective(
+                glm::radians(fov), extent.x / (float)extent.y, 0.1F, 10.0F);
+            proj[1][1] *= -1;
 
-    {
-        float fov = 70.0f;
+            auto view = glm::lookAt(glm::vec3(2.0F, 2.0F, 2.0F),
+                                    glm::vec3(0.0F, 0.0F, 0.0F),
+                                    glm::vec3(0.0F, 0.0F, 1.0F));
 
-        auto extent = gint->getViewport();
-        auto proj = glm::perspective(glm::radians(fov),
-                                     extent.x / (float)extent.y, 0.1f, 10.0f);
-        proj[1][1] *= -1;
+            perspective->configure(proj, view);
+        }
 
-        auto view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
-                                glm::vec3(0.0f, 0.0f, 0.0f),
-                                glm::vec3(0.0f, 0.0f, 1.0f));
+        perspective->use();
 
-        perspective->configure(proj, view);
+        float contrast = glm::sin(gint->tmp_getTime() / 3) * 0.18F + 0.18F;
+        glm::vec3 color0(0.60F, 0.60F, 0.70F);
+        glm::vec3 color1(1.10F, 1.05F, 0.70F);
+
+        auto m =
+            static_cast<float>(glm::sin(gint->tmp_getTime() / 3) * 0.5 + 0.5);
+        glm::vec3 color = m * color1 + (1 - m) * color0;
+
+        light->configure(color, glm::vec3(1.0F, -2.0F, 1.0F), contrast, 0.1F);
+        light->use();
+
+        auto model = glm::eulerAngleYXZ(0.0F, 0.0F, gint->tmp_getTime() * 0.1F);
+
+        gint->setModelTransform(model);
+        cube1->draw();
+        cube2->draw();
     }
 
-    perspective->use();
+    ~GameImpl() override {
+        debug("game shutdown begin");
 
-    float contrast = glm::sin(gint->tmp_getTime() / 3) * 0.18f + 0.18f;
-    glm::vec3 color0(0.60f, 0.60f, 0.70f);
-    glm::vec3 color1(1.10f, 1.05f, 0.70f);
+        cube1.reset();
+        cube2.reset();
+        texture1.reset();
+        texture2.reset();
 
-    float m = glm::sin(gint->tmp_getTime() / 3) * 0.5 + 0.5;
-    glm::vec3 color = m * color1 + (1 - m) * color0;
+        light.reset();
+        perspective.reset();
 
-    light->configure(color, glm::vec3(1.0f, -2.0f, 1.0f), contrast, 0.1f);
-    light->use();
+        debug("game shutdown complete");
+    }
+};
 
-    auto model = glm::eulerAngleYXZ(0.0f, 0.0f, gint->tmp_getTime() * 0.1f);
-
-    gint->setModelTransform(model);
-    cube1->draw();
-    cube2->draw();
-}
-
-void shutdown() {
-    debug("game shutdown begin");
-
-    cube1.reset();
-    cube2.reset();
-    texture1.reset();
-    texture2.reset();
-
-    light.reset();
-    perspective.reset();
-
-    debug("game shutdown complete");
+std::unique_ptr<Game> makeGame(GraphicsInterface &gint) {
+    return std::make_unique<GameImpl>(gint);
 }
 
 } // namespace progressia::main
