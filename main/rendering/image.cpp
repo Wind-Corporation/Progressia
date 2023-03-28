@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <vector>
 
 #include "stb/stb_image.h"
@@ -23,7 +24,7 @@ Image::Byte *Image::getData() { return data.data(); }
 
 Image loadImage(const std::string &path) {
 
-    auto resource = __embedded_resources::getEmbeddedResource(path.c_str());
+    auto resource = __embedded_resources::getEmbeddedResource(path);
 
     if (resource.data == nullptr) {
         // REPORT_ERROR
@@ -35,15 +36,22 @@ Image loadImage(const std::string &path) {
     std::vector<Image::Byte> png(resource.data,
                                  resource.data + resource.length);
 
-    int width;
-    int height;
-    int channelsInFile;
+    if (png.size() > std::numeric_limits<int>::max()) {
+        // REPORT_ERROR
+        progressia::main::logging::fatal()
+            << "Could not load \"" << path << "\": image file too large";
+        exit(1);
+    }
 
-    Image::Byte *stbAllocatedData =
-        stbi_load_from_memory(png.data(), png.size(), &width, &height,
-                              &channelsInFile, STBI_rgb_alpha);
+    int dataSize = static_cast<int>(png.size());
+    int width = 0;
+    int height = 0;
+    int channelsInFile = 0;
 
-    if (stbAllocatedData == NULL) {
+    Image::Byte *stbAllocatedData = stbi_load_from_memory(
+        png.data(), dataSize, &width, &height, &channelsInFile, STBI_rgb_alpha);
+
+    if (stbAllocatedData == nullptr) {
         fatal() << "Could not decode a PNG image from file " << path;
         // REPORT_ERROR
         exit(1);
