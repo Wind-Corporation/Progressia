@@ -177,9 +177,14 @@ def format_project():
            stdin=diff, result_when_dry='', quiet=False)
 
 
-def unformat_project(indexed):
+def unformat_project(indexed_existing):
     """Undo formatting changes introduced by format_project()."""
     print('Undoing formatting changes')
+    
+    if len(indexed_existing) == 0:
+        print('Nothing to do: all indexed changes are deletions')
+        return
+    
     invoke(*git, 'restore', '--', *indexed)
 
 
@@ -215,9 +220,11 @@ def pre_commit():
              'Compile project manually to set this variable properly.')
     
     indexed, unindexed = get_file_sets()
+    indexed_existing = [f for f in indexed if os.path.exists(f)]
     if verbose_mode:
         long_print_iter('Indexed changes', indexed)
         long_print_iter('Unindexed changes', unindexed)
+        long_print_iter('Indexed changes without deletions', indexed_existing)
     
     if len(indexed) == 0:
         fail('No indexed changes. You probably forgot to run `git add .`')
@@ -245,12 +252,17 @@ def pre_commit():
         
     finally:
         if undo_formatting:
-            unformat_project(indexed)
+            unformat_project(indexed_existing)
         if restore:
             do_restore()
     
     print('Staging formatting changes')
-    invoke(*git, 'add', '--', *indexed, result_when_dry='', quiet=False)
+    
+    if len(indexed_existing) == 0:
+        print('Nothing to do: all indexed changes are deletions')
+    else:
+        invoke(*git, 'add', '--', *indexed_existing,
+               result_when_dry='', quiet=False)
             
             
 def get_settings_path():
