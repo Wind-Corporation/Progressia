@@ -185,7 +185,7 @@ def unformat_project(indexed_existing):
         print('Nothing to do: all indexed changes are deletions')
         return
     
-    invoke(*git, 'restore', '--', *indexed)
+    invoke(*git, 'restore', '--', *indexed_existing)
 
 
 def build_project():
