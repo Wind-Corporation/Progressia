@@ -48,7 +48,6 @@ import json
 STASH_NAME = 'progressia_pre_commit_stash'
 # Paths are relative to this script's directory, tools/
 SETTINGS_PATH = 'pre-commit-settings.json'
-CLANG_FORMAT_PATH = 'clang-format/clang-format.json'
 CLANG_TIDY_CHECK_MARKER = 'Clang-tidy is enabled. ' \
                           'This is a marker for pre-commit.py'
 
@@ -163,17 +162,10 @@ def do_restore():
 
 def format_project():
     """Format staged files with clang-format-diff."""
-    print('Formatting code')
-    format_file = os.path.join(os.path.dirname(__file__),
-                               CLANG_FORMAT_PATH)
-    
-    with open(format_file, encoding='utf-8') as f:
-        style = f.read()
-    
     diff = invoke(*git, 'diff', '-U0', '--no-color', '--relative', 'HEAD',
                   *(f"{d}/*.{e}" for d in src_dirs for e in exts))
     
-    invoke(*clang_format_diff, '-p1', '-i', '--verbose', '-style=' + style,
+    invoke(*clang_format_diff, '-p1', '-i', '--verbose',
            stdin=diff, result_when_dry='', quiet=False)
 
 
