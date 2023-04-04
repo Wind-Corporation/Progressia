@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 usage = \
-'''Usage: embed.py --cpp OUT_CPP --header OUT_H [--] [INPUT as PATH]...
+'''Usage: %(me)s --cpp OUT_CPP --header OUT_H [--] [INPUT as PATH]...
 Generate C++ source code that includes binary contents of INPUT files.
 
 Each file in INPUT is stored as a resource: a static array of unsigned char.
@@ -79,6 +79,7 @@ def main():
                 fail(f"Unknown option '{arg}'")
 
         elif considerOptions and (arg == '-h' or arg == '--help'):
+            print(usage % {'me': os.path.basename(sys.argv[0])})
             sys.exit(0)
 
         elif considerOptions and arg == '--':

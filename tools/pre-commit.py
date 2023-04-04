@@ -69,7 +69,7 @@ def long_print_iter(title, it):
     print the string (nothing) instead.
     """
     print(title + ':')
-    
+
     if len(it) > 0:
         print('\t' + '\n\t'.join(it) + '\n')
     else:
@@ -79,11 +79,11 @@ def long_print_iter(title, it):
 def invoke(*cmd, result_when_dry=None, quiet=True, text=True, stdin=None):
     """Execute given system command and return its stdout. If command fails,
     throw CalledProcessError.
-    
+
     When in verbose mode, log command before execution. If in dry-run mode and
     result_when_dry is not None, skip execution and return result_when_dry
     instead.
-    
+
     Keyword arguments:
     result_when_dry -- unless None (default), skip execution and return this
     quiet -- if False, print stdout (default True)
@@ -95,15 +95,15 @@ def invoke(*cmd, result_when_dry=None, quiet=True, text=True, stdin=None):
     if dry_run and result_when_dry is not None:
         print(my_name + ':   skipped: --dry-run')
         return result_when_dry
-    
+
     popen = subprocess.Popen(cmd,
         stdout=subprocess.PIPE,
         text=text,
         universal_newlines=text,
         stdin=subprocess.PIPE if stdin else subprocess.DEVNULL)
-    
+
     stdout, _ = popen.communicate(input=stdin)
-    
+
     if text and not quiet:
         print(stdout, end='')
 
@@ -119,11 +119,11 @@ def get_file_sets():
     def git_z(*cmd):
         raw = invoke(*git, *cmd, '-z', text=False)
         return set(f.decode() for f in raw.split(b'\x00') if len(f) != 0)
-    
+
     indexed   = git_z('diff', '--name-only', '--cached')
     unindexed = git_z('diff', '--name-only') | \
                 git_z('ls-files', '--other', '--exclude-standard')
-    
+
     return indexed, unindexed
 
 
@@ -145,9 +145,9 @@ def run_safety_checks(indexed, unindexed):
 def do_restore():
     """Restore repository and filesystem. Fail if stash not found."""
     print('Redoing rolled back changes')
-    
+
     git_list = invoke(*git, 'stash', 'list', '--grep', f"\\b{STASH_NAME}$")
-    
+
     if len(git_list) == 0:
         if dry_run:
             stash_name = 'stash@{0}'
@@ -155,7 +155,7 @@ def do_restore():
             fail(f"Cannot restore repository: stash {STASH_NAME} not found")
     else:
         stash_name, _, _ = git_list.partition(':')
-    
+
     invoke(*git, 'stash', 'pop', '--index', '--quiet', stash_name,
            result_when_dry='', quiet=False)
 
@@ -164,7 +164,7 @@ def format_project():
     """Format staged files with clang-format-diff."""
     diff = invoke(*git, 'diff', '-U0', '--no-color', '--relative', 'HEAD',
                   *(f"{d}/*.{e}" for d in src_dirs for e in exts))
-    
+
     invoke(*clang_format_diff, '-p1', '-i', '--verbose',
            stdin=diff, result_when_dry='', quiet=False)
 
@@ -172,11 +172,11 @@ def format_project():
 def unformat_project(indexed_existing):
     """Undo formatting changes introduced by format_project()."""
     print('Undoing formatting changes')
-    
+
     if len(indexed_existing) == 0:
         print('Nothing to do: all indexed changes are deletions')
         return
-    
+
     invoke(*git, 'restore', '--', *indexed_existing)
 
 
@@ -188,39 +188,39 @@ def build_project():
                        '--parallel', str(parallelism),
                        result_when_dry=CLANG_TIDY_CHECK_MARKER,
                        quiet=False)
-    
+
     if CLANG_TIDY_CHECK_MARKER not in build_log.splitlines():
         fail('Project build was successful, but clang-tidy did not run. '
              'Please make sure DEV_MODE is ON and regenerate CMake cache.')
-    
+
     print('Success')
-    
+
 
 def pre_commit():
     """Run pre-commit checks."""
-    
+
     if build_root is None:
         fail(f"build-root is not set in {SETTINGS_PATH}. Compile project "
              'manually to set this variable properly.')
     if not os.path.exists(build_root):
         fail(f"build-root {build_root} does not exist. Compile project "
              'manually to set this variable properly.')
-        
+
     cmakeCache = os.path.join(build_root, 'CMakeCache.txt')
     if not os.path.exists(cmakeCache):
         fail(f"{cmakeCache} does not exist. build-root is likely invalid. "
              'Compile project manually to set this variable properly.')
-    
+
     indexed, unindexed = get_file_sets()
     indexed_existing = [f for f in indexed if os.path.exists(f)]
     if verbose_mode:
         long_print_iter('Indexed changes', indexed)
         long_print_iter('Unindexed changes', unindexed)
         long_print_iter('Indexed changes without deletions', indexed_existing)
-    
+
     if len(indexed) == 0:
         fail('No indexed changes. You probably forgot to run `git add .`')
-    
+
     run_safety_checks(indexed, unindexed)
 
     undo_formatting = False
@@ -236,27 +236,27 @@ def pre_commit():
                    '--message', STASH_NAME,
                    result_when_dry='', quiet=False)
             restore = True
-        
+
         format_project()
         undo_formatting = True
         build_project()
         undo_formatting = False
-        
+
     finally:
         if undo_formatting:
             unformat_project(indexed_existing)
         if restore:
             do_restore()
-    
+
     print('Staging formatting changes')
-    
+
     if len(indexed_existing) == 0:
         print('Nothing to do: all indexed changes are deletions')
     else:
         invoke(*git, 'add', '--', *indexed_existing,
                result_when_dry='', quiet=False)
-            
-            
+
+
 def get_settings_path():
     return os.path.abspath(os.path.join(os.path.dirname(__file__),
                                         SETTINGS_PATH))
@@ -288,12 +288,12 @@ def parse_args():
     global verbose_mode
     global dry_run
     global allow_update
-    
+
     consider_options = True
     action = None
     arg_cmake_executable = None
     arg_build_root = None
-    
+
     for arg in sys.argv[1:]:
         if arg == 'restore' or arg == 'set-build-info' or arg == 'run':
             if action is not None:
@@ -321,23 +321,23 @@ def parse_args():
             arg_build_root = arg
         else:
             fail(f"Unknown or unexpected argument '{arg}'")
-    
+
     if action is None:
         fail('No action specified')
-        
+
     if action == 'set-build-info' and arg_cmake_executable is None:
         fail('No CMake executable given')
-    
+
     if action == 'set-build-info' and arg_build_root is None:
         fail('No build root given')
-    
+
     return action, arg_build_root, arg_cmake_executable
 
 
 def load_settings():
     """Ensure pre-commit-settings.json exists and is loaded into memory."""
     global settings
-    
+
     path = get_settings_path()
     if os.path.exists(path):
         with open(path, mode='r') as f:
@@ -362,22 +362,22 @@ def parse_settings():
     global cmake
     global clang_format_diff
     global parallelism
-    
+
     build_root = settings['build_root']
     parallelism = settings['parallelism']
-    
+
     def find_command(hints, settings_name):
         if settings[settings_name] is not None:
             hints = [settings[settings_name]]
-        
+
         cmds = (hint.split(';') for hint in hints)
         res = next((cmd for cmd in cmds if shutil.which(cmd[0])), None) \
             or fail(f"Command {hints[0]} not found. Set {settings_name} " +
                     f"in {path} or check PATH")
-        
+
         verbose(f"Found command {hints[0]}:", *(repr(c) for c in res))
         return res
-    
+
     git = find_command(['git'], 'git')
     cmake = find_command(['cmake'], 'cmake')
     clang_format_diff = find_command(['clang-format-diff-13',
@@ -391,14 +391,14 @@ if __name__ == '__main__':
     verbose_mode = False
     dry_run = False
     allow_update = True
-    
+
     action, arg_build_root, arg_cmake_executable = parse_args()
     load_settings()
-    
+
     if dry_run:
         print('Running in dry mode: no changes to filesystem or git will '
               'actually be performed')
-    
+
     try:
         if action == 'set-build-info':
             set_build_info()
