@@ -101,7 +101,7 @@ if (WIN32 AND NOT BUILD_ID STREQUAL "dev")
     set_target_properties(progressia PROPERTIES WIN32_EXECUTABLE true)
 
     if (compiler_cl_dialect STREQUAL "GCC")
-        target_link_options(progressia PRIVATE -static-libstdc++ -static-libgcc)
+        target_link_options(progressia PRIVATE -static)
     elseif (compiler_cl_dialect STREQUAL "MSVC")
         target_link_options(progressia PRIVATE /entry:mainCRTStartup)
 
