@@ -31,4 +31,3 @@ for details or help.
   - [STB  (GitHub)](https://github.com/nothings/stb)  –  collection  of  various
       algorithms
       - `stb_image` – PNG loading
-  - [Boost](https://www.boost.org/) – utility library
