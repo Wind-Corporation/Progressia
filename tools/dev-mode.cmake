@@ -37,7 +37,7 @@ if (DEV_MODE)
 
             if (${CMAKE_VERSION} VERSION_LESS "3.19.0")
                 if (${CMAKE_HOST_UNIX})
-                    execute_process(COMMAND chmod "+x" "${pre_commit_hook}"
+                    execute_process(COMMAND chmod "755" "${pre_commit_hook}"
                         RESULT_VARIABLE chmod_RESULT)
                     if (${chmod_RESULT})
                         message(FATAL_ERROR "Could not make git pre-commit hook executable")
@@ -45,7 +45,10 @@ if (DEV_MODE)
                 endif()
             else()
                 file(CHMOD "${pre_commit_hook}"
-                    PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
+                    PERMISSIONS
+                    OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                    GROUP_READ GROUP_EXECUTE
+                    WORLD_READ WORLD_EXECUTE)
             endif()
         endif()
         unset(pre_commit_hook)
