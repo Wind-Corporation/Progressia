@@ -1,32 +1,25 @@
 # Building Guide
 
-This document  provides instructions  for building Progressia  from source code.
+This document  provides instructions for building Progressia  from source code.
 See also
     [Development Setup Guide](DevelopmentSetupGuide.md)
 and
-    [IDE setup guides](TODO).
+    [IDE setup guides](ide_setup).
 
 MacOS targets are not supported at this moment.
 
 ## Short version
 Debian/Ubuntu:
 ```bash
-# Install GCC, CMake, Python 3, git, Vulkan, GLFW and GLM
+# Install GCC, CMake, Python 3, glslc, git, Vulkan, GLFW and GLM
 sudo apt update && sudo apt install -y \
-    g++ cmake python3 git curl libvulkan-dev libglfw3-dev libglm-dev
-
-# Install glslc
-sudo mkdir -p /opt/glslc
-( cd /opt/glslc
-  sudo curl -LO https://windcorp.ru/other/glslc-v2022.1-6-ga0a247d-static &&
-  sudo chmod +x glslc* &&
-  sudo ln -s glslc* /usr/local/bin/glslc; )
+    g++ cmake python3 glslc git libvulkan-dev libglfw3-dev libglm-dev
 
 # Clone project
-git clone CLONE-URL
+git clone https://github.com/Wind-Corporation/Progressia.git
 cd Progressia
 
-# Generate build files for release
+# Generate build files for release (MY-1 is the build ID)
 cmake -S . -B build -DBUILD_ID=MY-1 -DCMAKE_BUILD_TYPE=Release
 
 # Compile
@@ -38,14 +31,15 @@ build/progressia
 
 Fedora:
 ```bash
-# Install GCC, CMake, Python 3, git, Vulkan, GLFW, GLM and glslc
-dnf install -y gcc-c++ cmake python3 git vulkan-devel glfw-devel glm-devel glslc
+# Install GCC, CMake, Python 3, glslc, git, Vulkan, GLFW and GLM
+sudo dnf install -y \
+    gcc-c++ cmake python3 glslc git vulkan-devel glfw-devel glm-devel
 
 # Clone project
-git clone CLONE-URL
+git clone https://github.com/Wind-Corporation/Progressia.git
 cd Progressia
 
-# Generate build files for release
+# Generate build files for release (MY-1 is the build ID)
 cmake -S . -B build -DBUILD_ID=MY-1 -DCMAKE_BUILD_TYPE=Release
 
 # Compile
@@ -55,21 +49,21 @@ cmake --build build
 build/progressia
 ```
 
-Windows: _see [IDE setup guides](TODO)._
+Windows: _see [IDE setup guides](ide_setup)._
 
 ## Prerequisites
 
 ### C++ compiler
 
-Project explicitly fully supports GCC, MinGW and Clang. Compilation with MSVC is
-also supported, but it can't be used for release builds and its use is generally
-discouraged.
+Project explicitly fully  supports GCC, MinGW and Clang.  Compilation with MSVC
+is also  supported, but  it can't  be used for  release builds  and its  use is
+generally discouraged.
 
 On Windows,
     [w64devkit](https://github.com/skeeto/w64devkit/releases)
 distribution of MinGW was tested.
 
-Cross-compilation  from  Linux  to Windows  is also  explicitly  supported  with
+Cross-compilation  from  Linux to Windows  is also  explicitly  supported  with
 MinGW-w64 as provided by Debian.
 
 ### CMake
@@ -85,35 +79,27 @@ MinGW-w64 as provided by Debian.
 The following Vulkan components are strictly necessary for builds:
   - Header files
   - Loader static library (`vulkan-1.lib`)
-  - `glslc` (standalone downloads
-        [here](https://github.com/google/shaderc/blob/main/downloads.md))
+  - `glslc` ([standalone downloads](https://github.com/google/shaderc/blob/main/downloads.md))
 
-However, it is usually  easier to install a complete  Vulkan SDK. An open-source
+However, it is usually easier to install a complete  Vulkan SDK. An open-source
 Vulkan SDK can be downloaded from
     [LunarG](https://www.lunarg.com/vulkan-sdk/)
 for all platforms.
 
-Debian users can install this dependency using APT:
+Debian/Ubuntu users can install this dependency using APT:
 ```bash
-apt install libvulkan-dev
-```
-However, Debian Bullseye repositories
-    [do not include](https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=890472)
-glslc. It  should be installed  manually; see standalone  link above or use this
-script:
-```bash
-sudo mkdir -p /opt/glslc
-( cd /opt/glslc
-  sudo curl -LO https://windcorp.ru/other/glslc-v2022.1-6-ga0a247d-static &&
-  sudo chmod +x glslc* &&
-  sudo ln -s glslc* /usr/local/bin/glslc; )
+apt install libvulkan-dev glslc
 ```
 
-Ubuntu dpkg packages are available from LunarG.
-
-Fedora users can install Vulkan using dnf:
+Fedora users can install this dependency using dnf:
 ```bash
 dnf install vulkan-devel glslc
+```
+
+Windows users using vcpkg should install  the LunarG distribution, then install
+the `vulkan` vcpkg package:
+```cmd
+vcpkg install vulkan:x64-mingw-static
 ```
 
 ### Other libraries
@@ -121,6 +107,21 @@ dnf install vulkan-devel glslc
 The following libraries are additionally required:
   - [GLFW](https://www.glfw.org/download.html) version 3.3.2 or higher
   - [GLM](https://glm.g-truc.net/)
+
+Debian/Ubuntu users can install these dependencies using APT:
+```bash
+apt install libglfw3-dev libglm-dev
+```
+
+Fedora users can install these dependencies using dnf:
+```bash
+dnf install glfw-devel glm-devel
+```
+
+Windows users can install these dependencies using vcpkg:
+```cmd
+vcpkg install glfw3:x64-mingw-static glm:x64-mingw-static
+```
 
 ## Downloading source code
 
@@ -136,16 +137,16 @@ git clone <clone url>
 ### CMake
 
 Use CMake to generate build files. There are a few options available:
-  - **`BUILD_ID`**  enables release  builds and  specifies visible  unique build
+  - **`BUILD_ID`**  enables release  builds and specifies visible  unique build
     identifier string.
-  - `DEV_MODE` enables developer features.
-    See [Development Setup Guide](DevelopmentSetupGuide.md).
+  - `DEV_MODE`, `VULKAN_ERROR_CHECKING`:
+    see [Development Setup Guide](DevelopmentSetupGuide.md).
   - `VULKAN_ERROR_CHECKING` enables Vulkan debug features. This requires Vulkan
-    validation    layers   (available    as   part   of   LunarG   Vulkan   SDK,
-    `vulkan-validationlayers-dev`  Debian   package  and  `vulkan-devel`  Fedora
+    validation    layers   (available   as   part   of   LunarG   Vulkan   SDK,
+    `vulkan-validationlayers-dev`  Debian  package  and  `vulkan-devel`  Fedora
     package).
 
-Directory `build` in project root is ignored by git for builders' convenience.
+Directory `build` in project root is ignored by git for convenience.
 
 This step is usually performed in the IDE.
 
@@ -160,7 +161,7 @@ cmake -S . -B build -DBUILD_ID=MY-1 -DCMAKE_BUILD_TYPE=Release
 
 > **Note**
 >
-> Use proper  build IDs  if distribution  is expected. Convention  is two-letter
+> Use proper  build IDs if  distribution is expected. Convention  is two-letter
 > builder identifier, a dash and a unique ascending build number.
 >
 > For example, automated builds at windcorp.ru use IDs `WA-1`, `WA-2`, etc.
@@ -187,5 +188,5 @@ cmake --build build
 
 Executable file will be located directly inside the CMake binary directory.
 
-Directory `run`  in project root  is ignored by git  for builders'  convenience;
-using project root as working directory is safe for debug builds.
+Directory `run` in  project  root is  ignored  by git  for  convenience;  using
+project root as working directory is safe for debug builds.
