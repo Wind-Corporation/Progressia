@@ -2,6 +2,7 @@
 
 #include "vulkan_common.h"
 
+#include <array>
 #include <cstddef>
 #include <fstream>
 #include <memory>
@@ -25,8 +26,7 @@
 
 #include <embedded_resources.h>
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 using progressia::main::Vertex;
 
@@ -50,7 +50,7 @@ auto getVertexFieldProperties() {
 
 namespace {
 std::vector<char> tmp_readFile(const std::string &path) {
-    auto resource = __embedded_resources::getEmbeddedResource(path.c_str());
+    auto resource = __embedded_resources::getEmbeddedResource(path);
 
     if (resource.data == nullptr) {
         // REPORT_ERROR
@@ -59,7 +59,7 @@ std::vector<char> tmp_readFile(const std::string &path) {
         exit(1);
     }
 
-    return std::vector<char>(resource.data, resource.data + resource.length);
+    return {resource.data, resource.data + resource.length};
 }
 } // namespace
 
@@ -82,25 +82,26 @@ Adapter::Adapter(Vulkan &vulkan)
          VK_ATTACHMENT_LOAD_OP_CLEAR,
          VK_ATTACHMENT_STORE_OP_DONT_CARE,
 
-         {1.0f, 0},
+         {1.0F, 0},
 
          nullptr});
 }
 
-Adapter::~Adapter() {
-    // Do nothing
-}
+Adapter::~Adapter() = default;
 
 std::vector<Attachment> &Adapter::getAttachments() { return attachments; }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static): future-proofing
 std::vector<char> Adapter::loadVertexShader() {
     return tmp_readFile("shader.vert.spv");
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static): future-proofing
 std::vector<char> Adapter::loadFragmentShader() {
     return tmp_readFile("shader.frag.spv");
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static): future-proofing
 VkVertexInputBindingDescription Adapter::getVertexInputBindingDescription() {
     VkVertexInputBindingDescription bindingDescription{};
     bindingDescription.binding = 0;
@@ -111,6 +112,7 @@ VkVertexInputBindingDescription Adapter::getVertexInputBindingDescription() {
 }
 
 std::vector<VkVertexInputAttributeDescription>
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static): future-proofing
 Adapter::getVertexInputAttributeDescriptions() {
     std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
 
@@ -151,8 +153,8 @@ void Adapter::onPreFrame() {
  * graphics_interface implementation
  */
 
-} // namespace desktop
-namespace main {
+} // namespace progressia::desktop
+namespace progressia::main {
 
 using namespace progressia::desktop;
 
@@ -163,122 +165,125 @@ struct DrawRequest {
     glm::mat4 modelTransform;
 };
 
+// NOLINTNEXTLINE: TODO
 std::vector<DrawRequest> pendingDrawCommands;
+constexpr std::size_t PENDING_DRAW_COMMANDS_MAX_SIZE = 100000;
+
+// NOLINTNEXTLINE: TODO
 glm::mat4 currentModelTransform;
+
 } // namespace
 
-progressia::main::Texture::Texture(Backend backend) : backend(backend) {}
+struct progressia::main::Texture::Backend {
+    progressia::desktop::Texture texture;
+};
 
-progressia::main::Texture::~Texture() {
-    delete static_cast<progressia::desktop::Texture *>(this->backend);
-}
+progressia::main::Texture::Texture(std::unique_ptr<Backend> backend)
+    : backend(std::move(backend)) {}
 
-namespace {
-struct PrimitiveBackend {
+progressia::main::Texture::~Texture() = default;
 
+struct Primitive::Backend {
     IndexedBuffer<Vertex> buf;
     progressia::main::Texture *tex;
 };
-} // namespace
 
-Primitive::Primitive(Backend backend) : backend(backend) {}
+Primitive::Primitive(std::unique_ptr<Backend> backend)
+    : backend(std::move(backend)) {}
 
-Primitive::~Primitive() {
-    delete static_cast<PrimitiveBackend *>(this->backend);
-}
+Primitive::~Primitive() = default;
 
 void Primitive::draw() {
-    auto backend = static_cast<PrimitiveBackend *>(this->backend);
-
-    if (pendingDrawCommands.size() > 100000) {
+    if (pendingDrawCommands.size() > PENDING_DRAW_COMMANDS_MAX_SIZE) {
         backend->buf.getVulkan().getGint().flush();
     }
 
-    pendingDrawCommands.push_back(
-        {static_cast<progressia::desktop::Texture *>(backend->tex->backend),
-         &backend->buf, currentModelTransform});
+    pendingDrawCommands.push_back({&backend->tex->backend->texture,
+                                   &backend->buf, currentModelTransform});
 }
 
 const progressia::main::Texture *Primitive::getTexture() const {
-    return static_cast<PrimitiveBackend *>(this->backend)->tex;
+    return backend->tex;
 }
 
-View::View(Backend backend) : backend(backend) {}
+struct View::Backend {
+    Adapter::ViewUniform::State state;
+};
 
-View::~View() {
-    delete static_cast<Adapter::ViewUniform::State *>(this->backend);
-}
+View::View(std::unique_ptr<Backend> backend) : backend(std::move(backend)) {}
+
+View::~View() = default;
 
 void View::configure(const glm::mat4 &proj, const glm::mat4 &view) {
-
-    static_cast<Adapter::ViewUniform::State *>(this->backend)
-        ->update(proj, view);
+    backend->state.update(proj, view);
 }
 
 void View::use() {
-    auto backend = static_cast<Adapter::ViewUniform::State *>(this->backend);
-    backend->uniform->getVulkan().getGint().flush();
-    backend->bind();
+    backend->state.uniform->getVulkan().getGint().flush();
+    backend->state.bind();
 }
 
-Light::Light(Backend backend) : backend(backend) {}
+struct Light::Backend {
+    Adapter::LightUniform::State state;
+};
 
-Light::~Light() {
-    delete static_cast<Adapter::LightUniform::State *>(this->backend);
-}
+Light::Light(std::unique_ptr<Backend> backend) : backend(std::move(backend)) {}
+Light::~Light() = default;
 
 void Light::configure(const glm::vec3 &color, const glm::vec3 &from,
                       float contrast, float softness) {
 
-    static_cast<Adapter::LightUniform::State *>(this->backend)
-        ->update(Adapter::Light{glm::vec4(color, 1.0f),
-                                glm::vec4(glm::normalize(from), 1.0f), contrast,
-                                softness});
+    backend->state.update(Adapter::Light{glm::vec4(color, 1.0F),
+                                         glm::vec4(glm::normalize(from), 1.0F),
+                                         contrast, softness});
 }
 
 void Light::use() {
-    auto backend = static_cast<Adapter::LightUniform::State *>(this->backend);
-    backend->uniform->getVulkan().getGint().flush();
-    backend->bind();
+    backend->state.uniform->getVulkan().getGint().flush();
+    backend->state.bind();
 }
 
 GraphicsInterface::GraphicsInterface(Backend backend) : backend(backend) {}
 
-GraphicsInterface::~GraphicsInterface() {
-    // Do nothing
-}
+GraphicsInterface::~GraphicsInterface() = default;
 
-progressia::main::Texture *
+std::unique_ptr<progressia::main::Texture>
 GraphicsInterface::newTexture(const progressia::main::Image &src) {
-    auto backend = new progressia::desktop::Texture(
-        src, *static_cast<Vulkan *>(this->backend));
+    using Backend = progressia::main::Texture::Backend;
 
-    return new Texture(backend);
+    return std::make_unique<progressia::main::Texture>(
+        std::unique_ptr<Backend>(new Backend{progressia::desktop::Texture(
+            src, *static_cast<Vulkan *>(this->backend))}));
 }
 
-Primitive *
+std::unique_ptr<Primitive>
 GraphicsInterface::newPrimitive(const std::vector<Vertex> &vertices,
                                 const std::vector<Vertex::Index> &indices,
                                 progressia::main::Texture *texture) {
 
-    auto backend = new PrimitiveBackend{
-        IndexedBuffer<Vertex>(vertices.size(), indices.size(),
-                              *static_cast<Vulkan *>(this->backend)),
-        texture};
+    auto primitive = std::make_unique<Primitive>(
+        std::unique_ptr<Primitive::Backend>(new Primitive::Backend{
+            IndexedBuffer<Vertex>(vertices.size(), indices.size(),
+                                  *static_cast<Vulkan *>(this->backend)),
+            texture}));
 
-    backend->buf.load(vertices.data(), indices.data());
+    primitive->backend->buf.load(vertices.data(), indices.data());
 
-    return new Primitive(backend);
+    return primitive;
 }
 
-View *GraphicsInterface::newView() {
-    return new View(new Adapter::ViewUniform::State(
-        static_cast<Vulkan *>(this->backend)->getAdapter().createView()));
+std::unique_ptr<View> GraphicsInterface::newView() {
+    return std::make_unique<View>(std::unique_ptr<View::Backend>(
+        new View::Backend{Adapter::ViewUniform::State(
+            static_cast<Vulkan *>(this->backend)->getAdapter().createView())}));
 }
 
-Light *GraphicsInterface::newLight() {
-    return new Light(new Adapter::LightUniform::State(
-        static_cast<Vulkan *>(this->backend)->getAdapter().createLight()));
+std::unique_ptr<Light> GraphicsInterface::newLight() {
+    return std::make_unique<Light>(
+        std::unique_ptr<Light::Backend>(new Light::Backend{
+            Adapter::LightUniform::State(static_cast<Vulkan *>(this->backend)
+                                             ->getAdapter()
+                                             .createLight())}));
 }
 
 glm::vec2 GraphicsInterface::getViewport() const {
@@ -287,16 +292,17 @@ glm::vec2 GraphicsInterface::getViewport() const {
     return {extent.width, extent.height};
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static): future-proofing
 void GraphicsInterface::setModelTransform(const glm::mat4 &m) {
     currentModelTransform = m;
 }
 
 void GraphicsInterface::flush() {
 
-    auto commandBuffer = static_cast<Vulkan *>(this->backend)
-                             ->getCurrentFrame()
-                             ->getCommandBuffer();
-    auto pipelineLayout =
+    auto *commandBuffer = static_cast<Vulkan *>(this->backend)
+                              ->getCurrentFrame()
+                              ->getCommandBuffer();
+    auto *pipelineLayout =
         static_cast<Vulkan *>(this->backend)->getPipeline().getLayout();
 
     progressia::desktop::Texture *lastTexture = nullptr;
@@ -328,11 +334,11 @@ void GraphicsInterface::flush() {
     pendingDrawCommands.clear();
 }
 
+// NOLINTNEXTLINE: TODO
 float GraphicsInterface::tmp_getTime() { return glfwGetTime(); }
 
 uint64_t GraphicsInterface::getLastStartedFrame() {
     return static_cast<Vulkan *>(this->backend)->getLastStartedFrame();
 }
 
-} // namespace main
-} // namespace progressia
+} // namespace progressia::main

@@ -27,30 +27,28 @@ int main(int argc, char *argv[]) {
            << main::meta::VERSION_NUMBER << ")";
     debug("Debug is enabled");
 
-    desktop::initializeGlfw();
-    desktop::initializeVulkan();
-    desktop::showWindow();
+    auto glfwManager = desktop::makeGlfwManager();
+    desktop::VulkanManager vulkanManager;
+    glfwManager->setOnScreenResize([&]() { vulkanManager.resizeSurface(); });
+    glfwManager->showWindow();
 
-    main::initialize(desktop::getVulkan()->getGint());
+    auto game = main::makeGame(vulkanManager.getVulkan()->getGint());
 
     info("Loading complete");
-    while (desktop::shouldRun()) {
-        bool abortFrame = !desktop::startRender();
+    while (glfwManager->shouldRun()) {
+        bool abortFrame = !vulkanManager.startRender();
         if (abortFrame) {
             continue;
         }
 
-        main::renderTick();
+        game->renderTick();
 
-        desktop::endRender();
-        desktop::doGlfwRoutine();
+        vulkanManager.endRender();
+        glfwManager->doGlfwRoutine();
     }
     info("Shutting down");
 
-    desktop::getVulkan()->waitIdle();
-    main::shutdown();
-    desktop::shutdownVulkan();
-    desktop::shutdownGlfw();
+    vulkanManager.getVulkan()->waitIdle();
 
     return 0;
 }

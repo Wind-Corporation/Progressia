@@ -1,14 +1,13 @@
 #pragma once
 
-#include "boost/core/noncopyable.hpp"
+#include "util.h"
 #include <ostream>
 
-namespace progressia {
-namespace main {
+namespace progressia::main {
 
 namespace detail {
 
-class LogSink : private boost::noncopyable {
+class LogSink : private progressia::main::NonCopyable {
   private:
     bool isCurrentSink;
 
@@ -24,7 +23,7 @@ class LogSink : private boost::noncopyable {
     LogSink(bool isCurrentSink);
     ~LogSink();
 
-    LogSink(LogSink &&);
+    LogSink(LogSink &&) noexcept;
 
     template <typename T>
     friend const LogSink &operator<<(const LogSink &sink, const T &x) {
@@ -60,5 +59,4 @@ detail::LogSink fatal(const char *start = nullptr);
 void initializeLogging();
 void shutdownLogging();
 
-} // namespace main
-} // namespace progressia
+} // namespace progressia::main

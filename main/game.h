@@ -1,13 +1,16 @@
 #pragma once
 
 #include "rendering.h"
+#include "util.h"
 
-namespace progressia {
-namespace main {
+namespace progressia::main {
 
-void initialize(GraphicsInterface &);
-void renderTick();
-void shutdown();
+class Game : private NonCopyable {
+  public:
+    virtual ~Game() = default;
+    virtual void renderTick() = 0;
+};
 
-} // namespace main
-} // namespace progressia
+std::unique_ptr<Game> makeGame(GraphicsInterface &);
+
+} // namespace progressia::main

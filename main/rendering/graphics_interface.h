@@ -1,6 +1,6 @@
 #pragma once
 
-#include "boost/core/noncopyable.hpp"
+#include "../util.h"
 #include <vector>
 
 #define GLM_FORCE_RADIANS
@@ -12,8 +12,7 @@
 
 #include "image.h"
 
-namespace progressia {
-namespace main {
+namespace progressia::main {
 
 struct Vertex {
 
@@ -25,31 +24,27 @@ struct Vertex {
     glm::vec2 texCoord;
 };
 
-class Texture : private boost::noncopyable {
-  public:
-    using Backend = void *;
-
+class Texture : private progressia::main::NonCopyable {
   private:
-    Backend backend;
+    struct Backend;
+    std::unique_ptr<Backend> backend;
+    friend class GraphicsInterface;
 
     friend class Primitive;
 
   public:
-    Texture(Backend);
+    Texture(std::unique_ptr<Backend>);
     ~Texture();
 };
 
-class Primitive : private boost::noncopyable {
-  public:
-    using Backend = void *;
-
+class Primitive : private progressia::main::NonCopyable {
   private:
-    Backend backend;
-
+    struct Backend;
+    std::unique_ptr<Backend> backend;
     friend class GraphicsInterface;
 
   public:
-    Primitive(Backend);
+    Primitive(std::unique_ptr<Backend>);
     ~Primitive();
 
     void draw();
@@ -57,30 +52,28 @@ class Primitive : private boost::noncopyable {
     const Texture *getTexture() const;
 };
 
-class View : private boost::noncopyable {
-  public:
-    using Backend = void *;
-
+class View : private progressia::main::NonCopyable {
   private:
-    Backend backend;
+    struct Backend;
+    std::unique_ptr<Backend> backend;
+    friend class GraphicsInterface;
 
   public:
-    View(Backend);
+    View(std::unique_ptr<Backend>);
     ~View();
 
     void configure(const glm::mat4 &proj, const glm::mat4 &view);
     void use();
 };
 
-class Light : private boost::noncopyable {
-  public:
-    using Backend = void *;
-
+class Light : private progressia::main::NonCopyable {
   private:
-    Backend backend;
+    struct Backend;
+    std::unique_ptr<Backend> backend;
+    friend class GraphicsInterface;
 
   public:
-    Light(Backend);
+    Light(std::unique_ptr<Backend>);
     ~Light();
 
     void configure(const glm::vec3 &color, const glm::vec3 &from,
@@ -88,7 +81,7 @@ class Light : private boost::noncopyable {
     void use();
 };
 
-class GraphicsInterface : private boost::noncopyable {
+class GraphicsInterface : private progressia::main::NonCopyable {
   public:
     using Backend = void *;
 
@@ -99,18 +92,18 @@ class GraphicsInterface : private boost::noncopyable {
     GraphicsInterface(Backend);
     ~GraphicsInterface();
 
-    Texture *newTexture(const Image &);
+    std::unique_ptr<Texture> newTexture(const Image &);
 
-    Primitive *newPrimitive(const std::vector<Vertex> &,
-                            const std::vector<Vertex::Index> &,
-                            Texture *texture);
+    std::unique_ptr<Primitive> newPrimitive(const std::vector<Vertex> &,
+                                            const std::vector<Vertex::Index> &,
+                                            Texture *texture);
 
     glm::vec2 getViewport() const;
 
     void setModelTransform(const glm::mat4 &);
 
-    View *newView();
-    Light *newLight();
+    std::unique_ptr<View> newView();
+    std::unique_ptr<Light> newLight();
 
     void flush();
     void startNextLayer();
@@ -119,5 +112,4 @@ class GraphicsInterface : private boost::noncopyable {
     uint64_t getLastStartedFrame();
 };
 
-} // namespace main
-} // namespace progressia
+} // namespace progressia::main

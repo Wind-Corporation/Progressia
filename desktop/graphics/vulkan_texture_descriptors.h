@@ -5,8 +5,7 @@
 #include "vulkan_common.h"
 #include "vulkan_descriptor_set.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 class TextureDescriptors : public DescriptorSetInterface {
   private:
@@ -25,5 +24,4 @@ class TextureDescriptors : public DescriptorSetInterface {
     VkDescriptorSet addTexture(VkImageView, VkSampler);
 };
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

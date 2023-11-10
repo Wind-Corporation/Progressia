@@ -1,8 +1,8 @@
 #include "vulkan_common.h"
 
-#include "../config.h"
 #include "vulkan_adapter.h"
 #include "vulkan_frame.h"
+#include "vulkan_physical_device.h"
 #include "vulkan_pick_device.h"
 #include "vulkan_pipeline.h"
 #include "vulkan_render_pass.h"
@@ -15,8 +15,7 @@
 
 using namespace progressia::main::logging;
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 /*
  * Vulkan
@@ -27,7 +26,7 @@ Vulkan::Vulkan(std::vector<const char *> instanceExtensions,
                std::vector<const char *> validationLayers)
     :
 
-      frames(MAX_FRAMES_IN_FLIGHT), isRenderingFrame(false),
+      frames(MAX_FRAMES_IN_FLIGHT), currentFrame(0), isRenderingFrame(false),
       lastStartedFrame(0) {
 
     /*
@@ -58,7 +57,7 @@ Vulkan::Vulkan(std::vector<const char *> instanceExtensions,
 
         // Enable extensions
         {
-            uint32_t extensionCount;
+            uint32_t extensionCount = 0;
             vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount,
                                                    nullptr);
             std::vector<VkExtensionProperties> available(extensionCount);
@@ -89,7 +88,7 @@ Vulkan::Vulkan(std::vector<const char *> instanceExtensions,
 
         // Enable validation layers
         {
-            uint32_t layerCount;
+            uint32_t layerCount = 0;
             vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
             std::vector<VkLayerProperties> available(layerCount);
             vkEnumerateInstanceLayerProperties(&layerCount, available.data());
@@ -150,31 +149,25 @@ Vulkan::Vulkan(std::vector<const char *> instanceExtensions,
             exit(1);
         }
 
-        std::vector<VkPhysicalDevice> devices(deviceCount);
-        vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+        std::vector<VkPhysicalDevice> vkDevices(deviceCount);
+        vkEnumeratePhysicalDevices(instance, &deviceCount, vkDevices.data());
 
-        std::vector<PhysicalDeviceData> choices;
-
-        for (const auto &device : devices) {
-            PhysicalDeviceData data = {};
-            data.device = device;
-
-            vkGetPhysicalDeviceProperties(device, &data.properties);
-            vkGetPhysicalDeviceFeatures(device, &data.features);
-
-            choices.push_back(data);
+        std::vector<PhysicalDevice> choices;
+        choices.reserve(deviceCount);
+        for (const auto &vkDevice : vkDevices) {
+            choices.emplace_back(PhysicalDevice(vkDevice));
         }
 
         const auto &result =
             pickPhysicalDevice(choices, *this, deviceExtensions);
-        physicalDevice = result.device;
+        physicalDevice = std::make_unique<PhysicalDevice>(result);
     }
 
     /*
      * Setup queues
      */
 
-    queues = std::make_unique<Queues>(physicalDevice, *this);
+    queues = std::make_unique<Queues>(physicalDevice->getVk(), *this);
 
     /*
      * Create logical device
@@ -207,9 +200,9 @@ Vulkan::Vulkan(std::vector<const char *> instanceExtensions,
 
         // Create logical device
 
-        handleVkResult(
-            "Could not create logical device",
-            vkCreateDevice(physicalDevice, &createInfo, nullptr, &device));
+        handleVkResult("Could not create logical device",
+                       vkCreateDevice(physicalDevice->getVk(), &createInfo,
+                                      nullptr, &device));
 
         // Store queue handles
 
@@ -259,7 +252,6 @@ Vulkan::Vulkan(std::vector<const char *> instanceExtensions,
     for (auto &container : frames) {
         container.emplace(*this);
     }
-    currentFrame = 0;
 
     gint = std::make_unique<progressia::main::GraphicsInterface>(this);
 }
@@ -275,13 +267,16 @@ Vulkan::~Vulkan() {
     commandPool.reset();
     vkDestroyDevice(device, nullptr);
     surface.reset();
+    physicalDevice.reset();
     errorHandler.reset();
     vkDestroyInstance(instance, nullptr);
 }
 
 VkInstance Vulkan::getInstance() const { return instance; }
 
-VkPhysicalDevice Vulkan::getPhysicalDevice() const { return physicalDevice; }
+const PhysicalDevice &Vulkan::getPhysicalDevice() const {
+    return *physicalDevice;
+}
 
 VkDevice Vulkan::getDevice() const { return device; }
 
@@ -333,7 +328,8 @@ VkFormat Vulkan::findSupportedFormat(const std::vector<VkFormat> &candidates,
 
     for (VkFormat format : candidates) {
         VkFormatProperties props;
-        vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
+        vkGetPhysicalDeviceFormatProperties(physicalDevice->getVk(), format,
+                                            &props);
 
         if (tiling == VK_IMAGE_TILING_LINEAR &&
             (props.linearTilingFeatures & features) == features) {
@@ -351,8 +347,7 @@ VkFormat Vulkan::findSupportedFormat(const std::vector<VkFormat> &candidates,
 
 uint32_t Vulkan::findMemoryType(uint32_t allowedByDevice,
                                 VkMemoryPropertyFlags desiredProperties) {
-    VkPhysicalDeviceMemoryProperties memProperties;
-    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+    auto memProperties = physicalDevice->getMemory();
 
     for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
         if (((1 << i) & allowedByDevice) == 0) {
@@ -383,9 +378,9 @@ Frame *Vulkan::getCurrentFrame() {
     return nullptr;
 }
 
-uint64_t Vulkan::getLastStartedFrame() { return lastStartedFrame; }
+uint64_t Vulkan::getLastStartedFrame() const { return lastStartedFrame; }
 
-std::size_t Vulkan::getFrameInFlightIndex() { return currentFrame; }
+std::size_t Vulkan::getFrameInFlightIndex() const { return currentFrame; }
 
 bool Vulkan::startRender() {
     if (currentFrame >= MAX_FRAMES_IN_FLIGHT - 1) {
@@ -421,16 +416,21 @@ void Vulkan::waitIdle() {
  * VulkanErrorHandler
  */
 
-VulkanErrorHandler::VulkanErrorHandler(Vulkan &vulkan) : vulkan(vulkan) {
+VulkanErrorHandler::VulkanErrorHandler(Vulkan &vulkan)
+    : debugMessenger(nullptr), vulkan(vulkan) {
     // do nothing
 }
 
-VulkanErrorHandler::~VulkanErrorHandler() {
 #ifdef VULKAN_ERROR_CHECKING
-    vulkan.callVoid("vkDestroyDebugUtilsMessengerEXT",
-                    (VkDebugUtilsMessengerEXT)debugMessenger, nullptr);
-#endif
+VulkanErrorHandler::~VulkanErrorHandler() {
+    if (debugMessenger != nullptr) {
+        vulkan.callVoid("vkDestroyDebugUtilsMessengerEXT",
+                        (VkDebugUtilsMessengerEXT)debugMessenger, nullptr);
+    }
 }
+#else
+VulkanErrorHandler::~VulkanErrorHandler() = default;
+#endif
 
 #ifdef VULKAN_ERROR_CHECKING
 namespace {
@@ -445,7 +445,8 @@ debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         return VK_FALSE;
     }
 
-    [[maybe_unused]] auto &vk = *reinterpret_cast<const Vulkan *>(pUserData);
+    [[maybe_unused]] const auto &vk =
+        *reinterpret_cast<const Vulkan *>(pUserData);
 
     const char *severityStr =
         messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT
@@ -456,7 +457,7 @@ debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
             ? "info"
             : "verbose";
 
-    const char *typeStr;
+    const char *typeStr = "";
     switch (messageType) {
     case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
         typeStr = "general";
@@ -513,8 +514,9 @@ VulkanErrorHandler::attachDebugProbe(VkInstanceCreateInfo &createInfo) {
 
 #else
 
-    (void)createInfo;
-    return std::unique_ptr<VkDebugUtilsMessengerCreateInfoEXT>();
+    (void)createInfo; // unused argument
+    (void)this;       // not static
+    return {};
 
 #endif
 }
@@ -533,6 +535,7 @@ void VulkanErrorHandler::onInstanceReady() {
 #endif
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static): future-proofing
 void VulkanErrorHandler::handleVkResult(const char *errorMessage,
                                         VkResult result) {
     if (result == VK_SUCCESS) {
@@ -548,7 +551,7 @@ void VulkanErrorHandler::handleVkResult(const char *errorMessage,
  * Surface
  */
 
-Surface::Surface(Vulkan &vulkan) : vulkan(vulkan) {
+Surface::Surface(Vulkan &vulkan) : vk(), vulkan(vulkan) {
     vulkan.handleVkResult("Could not create window surface (what?)",
                           glfwCreateWindowSurface(vulkan.getInstance(),
                                                   getGLFWWindowHandle(),
@@ -563,7 +566,7 @@ VkSurfaceKHR Surface::getVk() { return vk; }
  * Queue
  */
 
-Queue::Queue(Test test) : test(test) {
+Queue::Queue(Test test) : test(std::move(test)), vk() {
     // do nothing
 }
 
@@ -619,7 +622,7 @@ Queues::Queues(VkPhysicalDevice physicalDevice, Vulkan &vulkan)
 
     for (std::size_t index = 0; index < queueFamilyCount; index++) {
 
-        for (auto queue : {&graphicsQueue, &presentQueue}) {
+        for (auto *queue : {&graphicsQueue, &presentQueue}) {
             if (!queue->isSuitable(physicalDevice, index, vulkan,
                                    properties[index])) {
                 continue;
@@ -634,12 +637,10 @@ Queues::Queues(VkPhysicalDevice physicalDevice, Vulkan &vulkan)
     }
 }
 
-Queues::~Queues() {
-    // do nothing
-}
+Queues::~Queues() = default;
 
 void Queues::storeHandles(VkDevice device) {
-    for (auto queue : {&graphicsQueue, &presentQueue}) {
+    for (auto *queue : {&graphicsQueue, &presentQueue}) {
         vkGetDeviceQueue(device, queue->getFamilyIndex(), 0, &queue->vk);
     }
 }
@@ -648,7 +649,7 @@ std::unique_ptr<Queues::CreationRequest>
 Queues::requestCreation(VkDeviceCreateInfo &createInfo) const {
 
     std::unique_ptr result = std::make_unique<CreationRequest>();
-    result->priority = 1.0f;
+    result->priority = 1.0F;
 
     std::unordered_set<uint32_t> uniqueQueues;
     for (const auto *queue : {&graphicsQueue, &presentQueue}) {
@@ -673,7 +674,7 @@ Queues::requestCreation(VkDeviceCreateInfo &createInfo) const {
 }
 
 bool Queues::isComplete() const {
-    for (auto queue : {&graphicsQueue, &presentQueue}) {
+    for (const auto *queue : {&graphicsQueue, &presentQueue}) {
         if (!queue->familyIndex.has_value()) {
             return false;
         }
@@ -691,7 +692,7 @@ const Queue &Queues::getPresentQueue() const { return presentQueue; }
  */
 
 CommandPool::CommandPool(Vulkan &vulkan, const Queue &queue)
-    : queue(queue), vulkan(vulkan) {
+    : pool(), queue(queue), vulkan(vulkan) {
 
     VkCommandPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -714,12 +715,13 @@ VkCommandBuffer CommandPool::allocateCommandBuffer() {
     allocInfo.commandPool = pool;
     allocInfo.commandBufferCount = 1;
 
-    VkCommandBuffer commandBuffer;
+    auto *commandBuffer = VkCommandBuffer();
     vkAllocateCommandBuffers(vulkan.getDevice(), &allocInfo, &commandBuffer);
 
     return commandBuffer;
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static): future-proofing
 void CommandPool::beginCommandBuffer(VkCommandBuffer commandBuffer,
                                      VkCommandBufferUsageFlags usage) {
     VkCommandBufferBeginInfo beginInfo{};
@@ -773,5 +775,4 @@ void CommandPool::freeMultiUse(VkCommandBuffer buffer) {
     vkFreeCommandBuffers(vulkan.getDevice(), pool, 1, &buffer);
 }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

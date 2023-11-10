@@ -1,34 +1,32 @@
 #include "vulkan_mgmt.h"
 
-#include "../config.h"
 #include "vulkan_common.h"
 #include "vulkan_swap_chain.h"
 
 #include "../../main/logging.h"
 using namespace progressia::main::logging;
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
-Vulkan *vulkan;
-
-void initializeVulkan() {
+VulkanManager::VulkanManager() {
     debug("Vulkan initializing");
 
     // Instance extensions
 
     std::vector<const char *> instanceExtensions;
     {
-        uint32_t glfwExtensionCount;
-        const char **glfwExtensions;
-        glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+        uint32_t glfwExtensionCount = 0;
+        const char **glfwExtensions =
+            glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
+        instanceExtensions.reserve(instanceExtensions.size() +
+                                   glfwExtensionCount);
         for (std::size_t i = 0; i < glfwExtensionCount; i++) {
-            instanceExtensions.push_back(glfwExtensions[i]);
+            instanceExtensions.emplace_back(glfwExtensions[i]);
         }
 
 #ifdef VULKAN_ERROR_CHECKING
-        instanceExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        instanceExtensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif
     }
 
@@ -44,29 +42,21 @@ void initializeVulkan() {
 #endif
     };
 
-    vulkan = new Vulkan(instanceExtensions, deviceExtensions, validationLayers);
+    vulkan = std::make_unique<Vulkan>(instanceExtensions, deviceExtensions,
+                                      validationLayers);
 
     debug("Vulkan initialized");
 }
 
-Vulkan *getVulkan() { return vulkan; }
+VulkanManager::~VulkanManager() { debug("Vulkan terminating"); }
 
-bool startRender() { return vulkan->startRender(); }
+Vulkan *VulkanManager::getVulkan() { return vulkan.get(); }
+const Vulkan *VulkanManager::getVulkan() const { return vulkan.get(); }
 
-void endRender() { return vulkan->endRender(); }
+bool VulkanManager::startRender() { return vulkan->startRender(); }
 
-void resizeVulkanSurface() { vulkan->getSwapChain().recreate(); }
+void VulkanManager::endRender() { return vulkan->endRender(); }
 
-void shutdownVulkan() {
-    debug("Vulkan terminating");
+void VulkanManager::resizeSurface() { vulkan->getSwapChain().recreate(); }
 
-    if (vulkan != nullptr) {
-        delete vulkan;
-        vulkan = nullptr;
-    }
-
-    debug("Vulkan terminated");
-}
-
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

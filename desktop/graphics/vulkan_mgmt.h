@@ -2,22 +2,27 @@
 
 #include "vulkan_common.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
-void initializeVulkan();
+class VulkanManager {
 
-Vulkan *getVulkan();
+  private:
+    std::unique_ptr<Vulkan> vulkan;
 
-void resizeVulkanSurface();
+  public:
+    VulkanManager();
+    ~VulkanManager();
 
-/*
- * Returns false when the frame should be skipped
- */
-bool startRender();
-void endRender();
+    Vulkan *getVulkan();
+    const Vulkan *getVulkan() const;
 
-void shutdownVulkan();
+    void resizeSurface();
 
-} // namespace desktop
-} // namespace progressia
+    /*
+     * Returns false when the frame should be skipped
+     */
+    bool startRender();
+    void endRender();
+};
+
+} // namespace progressia::desktop

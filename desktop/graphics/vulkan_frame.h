@@ -2,8 +2,7 @@
 
 #include "vulkan_common.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 class Frame : public VkObjectWrapper {
   private:
@@ -32,5 +31,4 @@ class Frame : public VkObjectWrapper {
     VkCommandBuffer getCommandBuffer();
 };
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

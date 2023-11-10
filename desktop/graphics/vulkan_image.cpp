@@ -9,8 +9,7 @@
 #include "vulkan_pipeline.h"
 #include "vulkan_texture_descriptors.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 /*
  * Image
@@ -21,9 +20,7 @@ Image::Image(VkImage vk, VkImageView view, VkFormat format)
     // do nothing
 }
 
-Image::~Image() {
-    // do nothing
-}
+Image::~Image() = default;
 
 /*
  * ManagedImage
@@ -34,7 +31,7 @@ ManagedImage::ManagedImage(std::size_t width, std::size_t height,
                            VkImageUsageFlags usage, Vulkan &vulkan)
     :
 
-      Image(VK_NULL_HANDLE, VK_NULL_HANDLE, format), vulkan(vulkan),
+      Image(VK_NULL_HANDLE, VK_NULL_HANDLE, format), memory(), vulkan(vulkan),
 
       state{VK_IMAGE_LAYOUT_UNDEFINED, 0, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT} {
 
@@ -147,7 +144,8 @@ Texture::Texture(const progressia::main::Image &src, Vulkan &vulkan)
       ManagedImage(src.width, src.height, VK_FORMAT_R8G8B8A8_SRGB,
                    VK_IMAGE_ASPECT_COLOR_BIT,
                    VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-                   vulkan) {
+                   vulkan),
+      sampler() {
 
     /*
      * Create a staging buffer
@@ -212,9 +210,9 @@ Texture::Texture(const progressia::main::Image &src, Vulkan &vulkan)
     samplerInfo.compareEnable = VK_FALSE;
     samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
     samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-    samplerInfo.mipLodBias = 0.0f;
-    samplerInfo.minLod = 0.0f;
-    samplerInfo.maxLod = 0.0f;
+    samplerInfo.mipLodBias = 0.0F;
+    samplerInfo.minLod = 0.0F;
+    samplerInfo.maxLod = 0.0F;
 
     vulkan.handleVkResult(
         "Could not create texture sampler",
@@ -224,6 +222,7 @@ Texture::Texture(const progressia::main::Image &src, Vulkan &vulkan)
      * Create descriptor set
      */
 
+    // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer): sampler must be set using vkCreateSampler first
     descriptorSet = vulkan.getTextureDescriptors().addTexture(view, sampler);
 }
 
@@ -234,8 +233,8 @@ Texture::~Texture() {
 
 void Texture::bind() {
     // REPORT_ERROR if getCurrentFrame() == nullptr
-    auto commandBuffer = vulkan.getCurrentFrame()->getCommandBuffer();
-    auto pipelineLayout = vulkan.getPipeline().getLayout();
+    auto *commandBuffer = vulkan.getCurrentFrame()->getCommandBuffer();
+    auto *pipelineLayout = vulkan.getPipeline().getLayout();
 
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                             pipelineLayout,
@@ -243,5 +242,4 @@ void Texture::bind() {
                             &descriptorSet, 0, nullptr);
 }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

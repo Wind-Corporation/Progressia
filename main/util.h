@@ -28,3 +28,25 @@
     };                                        \
 }
 // clang-format on
+
+// clang-format off
+#define DISABLE_MOVING(CLASS)            \
+    CLASS &operator=(CLASS &&) = delete; \
+    CLASS(CLASS &&) = delete;            \
+// clang-format on
+
+// clang-format off
+#define DISABLE_COPYING(CLASS)                \
+    CLASS &operator=(const CLASS &) = delete; \
+    CLASS(const CLASS &) = delete;            \
+// clang-format on
+
+namespace progressia::main {
+
+struct NonCopyable {
+    NonCopyable &operator=(const NonCopyable &) = delete;
+    NonCopyable(const NonCopyable &) = delete;
+    NonCopyable() = default;
+};
+
+} // namespace progressia::main

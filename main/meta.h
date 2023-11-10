@@ -1,10 +1,9 @@
 #pragma once
 
-#include "../config.h"
+#include <config.h>
 #include <cstdlib>
 
-namespace progressia {
-namespace main {
+namespace progressia::main {
 namespace meta {
 
 namespace detail {
@@ -37,5 +36,4 @@ constexpr uint32_t VERSION_MINOR = (VERSION_NUMBER & 0x00FF00) >> 8;
 constexpr uint32_t VERSION_PATCH = (VERSION_NUMBER & 0x0000FF) >> 0;
 
 } // namespace meta
-} // namespace main
-} // namespace progressia
+} // namespace progressia::main

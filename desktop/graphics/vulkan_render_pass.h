@@ -2,8 +2,7 @@
 
 #include "vulkan_common.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 class RenderPass : public VkObjectWrapper {
 
@@ -19,5 +18,4 @@ class RenderPass : public VkObjectWrapper {
     VkRenderPass getVk();
 };
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

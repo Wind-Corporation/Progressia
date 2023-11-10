@@ -8,12 +8,11 @@
 #include "vulkan_render_pass.h"
 #include "vulkan_swap_chain.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 Frame::Frame(Vulkan &vulkan)
-    : vulkan(vulkan),
-      commandBuffer(vulkan.getCommandPool().allocateMultiUse()) {
+    : vulkan(vulkan), commandBuffer(vulkan.getCommandPool().allocateMultiUse()),
+      imageAvailableSemaphore(), renderFinishedSemaphore(), inFlightFence() {
 
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -98,12 +97,12 @@ bool Frame::startRender() {
                       vulkan.getPipeline().getVk());
 
     VkViewport viewport{};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
+    viewport.x = 0.0F;
+    viewport.y = 0.0F;
     viewport.width = (float)extent.width;
     viewport.height = (float)extent.height;
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
+    viewport.minDepth = 0.0F;
+    viewport.maxDepth = 1.0F;
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
     VkRect2D scissor{};
@@ -170,5 +169,4 @@ void Frame::endRender() {
 
 VkCommandBuffer Frame::getCommandBuffer() { return commandBuffer; }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

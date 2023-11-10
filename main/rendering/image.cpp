@@ -4,15 +4,17 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <vector>
 
 #include "stb/stb_image.h"
 
+#include <embedded_resources.h>
+
 #include "../logging.h"
 using namespace progressia::main::logging;
 
-namespace progressia {
-namespace main {
+namespace progressia::main {
 
 std::size_t Image::getSize() const { return data.size(); }
 
@@ -20,33 +22,36 @@ const Image::Byte *Image::getData() const { return data.data(); }
 
 Image::Byte *Image::getData() { return data.data(); }
 
-Image loadImage(const std::filesystem::path &path) {
+Image loadImage(const std::string &path) {
 
-    std::ifstream file(path, std::ios::ate | std::ios::binary);
+    auto resource = __embedded_resources::getEmbeddedResource(path);
 
-    if (!file.is_open()) {
-        fatal() << "Could not access a PNG image in file " << path;
+    if (resource.data == nullptr) {
         // REPORT_ERROR
+        progressia::main::logging::fatal()
+            << "Could not find resource \"" << path << "\"";
         exit(1);
     }
 
-    std::size_t fileSize = static_cast<std::size_t>(file.tellg());
-    std::vector<Image::Byte> png(fileSize);
+    std::vector<Image::Byte> png(resource.data,
+                                 resource.data + resource.length);
 
-    file.seekg(0);
-    file.read(reinterpret_cast<char *>(png.data()), fileSize);
+    if (png.size() > std::numeric_limits<int>::max()) {
+        // REPORT_ERROR
+        progressia::main::logging::fatal()
+            << "Could not load \"" << path << "\": image file too large";
+        exit(1);
+    }
 
-    file.close();
+    int dataSize = static_cast<int>(png.size());
+    int width = 0;
+    int height = 0;
+    int channelsInFile = 0;
 
-    int width;
-    int height;
-    int channelsInFile;
+    Image::Byte *stbAllocatedData = stbi_load_from_memory(
+        png.data(), dataSize, &width, &height, &channelsInFile, STBI_rgb_alpha);
 
-    Image::Byte *stbAllocatedData =
-        stbi_load_from_memory(png.data(), png.size(), &width, &height,
-                              &channelsInFile, STBI_rgb_alpha);
-
-    if (stbAllocatedData == NULL) {
+    if (stbAllocatedData == nullptr) {
         fatal() << "Could not decode a PNG image from file " << path;
         // REPORT_ERROR
         exit(1);
@@ -61,5 +66,4 @@ Image loadImage(const std::filesystem::path &path) {
             data};
 }
 
-} // namespace main
-} // namespace progressia
+} // namespace progressia::main

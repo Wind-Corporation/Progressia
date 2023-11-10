@@ -4,11 +4,19 @@ build
 # Run directory
 run
 
-# Local environment setup file
-tools/private.sh
+# Local settings for pre-commit.py
+tools/pre-commit-settings.json
 
 # Prevent anyone from accidentally uploading CMakeFiles
 CMakeFiles
 
+# Visual Studio garbage
+.vs
+CMakeSettings.json
+out
+
 # Some weirdos use Kate
 *.kate-swp
+
+# Real creeps use KDevelop
+*.kdev*

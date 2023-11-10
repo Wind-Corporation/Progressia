@@ -1,0 +1,78 @@
+Checks: "-*,\
+  clang-analyzer-*,\
+  cppcoreguidelines-*,\
+  modernize-*,\
+  performance-*,\
+  readability-*,\
+  clang-diagnostic-*,\
+  -modernize-use-trailing-return-type,\
+  -readability-implicit-bool-conversion,\
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
+  -cppcoreguidelines-pro-type-reinterpret-cast,\
+  -cppcoreguidelines-pro-bounds-constant-array-index,\
+  -*-avoid-c-arrays,\
+  -readability-else-after-return,\
+  -readability-named-parameter,\
+  -readability-use-anyofallof,\
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,\
+  -performance-trivially-destructible,\
+  -modernize-make-unique,\
+  -cppcoreguidelines-prefer-member-initializer,\
+  -*-magic-numbers,\
+  -readability-suspicious-call-argument,\
+  -cppcoreguidelines-pro-type-union-access"
+
+# modernize-use-trailing-return-type
+#   ignore reason: reduces readability
+
+# readability-implicit-bool-conversion
+#   ignore reason: expected use by C libraries (GLFW, Vulkan API)
+
+# cppcoreguidelines-pro-bounds-array-to-pointer-decay
+#   ignore reason: expected use by C libraries
+
+# cppcoreguidelines-pro-type-reinterpret-cast
+#   ignore reason: expected use by C libraries
+
+# cppcoreguidelines-pro-bounds-constant-array-index
+#   ignore reason: infeasible to avoid without GSL
+
+# *-avoid-c-arrays
+#   ignore reason: often makes code significantly more verbose
+
+# readability-else-after-return
+#   ignore reason: personal preference of OLEGSHA (using 'else' helps highlight
+#   branches in code)
+
+# readability-named-parameter
+#   ignore reason: using GCC convention is clear enough
+
+# readability-use-anyofallof
+#   ignore reason: these relatively obscure functions reduce readability by
+#   increasing code complexity and verbosity
+
+# cppcoreguidelines-pro-bounds-pointer-arithmetic
+#   ignore reason: infeasible to avoid in C++17
+
+# performance-trivially-destructible
+#   ignore reason: breaks incapsulation too often
+
+# modernize-make-unique
+#   ignore reason: impossible with brace-init lists:
+#     struct S { int a; int b; };
+#     std::unique_ptr<S>(new S { 1, 2 }) // works
+#     std::make_unique<S>(1, 2) // error
+#     std::make_unique<S>({1, 2}) // error
+
+# cppcoreguidelines-prefer-member-initializer
+#   ignore reason: rule fails to notice execution order dependencies
+
+# *-magic-numbers
+#   ignore reason: triggers in many trivial cases (e.g. 6 sides of a cube);
+#   infeasible to avoid while writing placeholder code
+
+# readability-suspicious-call-argument
+#   ignore reason: trips up on geometry code (y no NOLINTBEGIN, Debian?)
+
+# cppcoreguidelines-pro-type-union-access
+#   ignore reason: triggers on GLM code

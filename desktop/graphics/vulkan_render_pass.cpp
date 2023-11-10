@@ -3,10 +3,9 @@
 #include "vulkan_adapter.h"
 #include "vulkan_common.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
-RenderPass::RenderPass(Vulkan &vulkan) : vulkan(vulkan) {
+RenderPass::RenderPass(Vulkan &vulkan) : vk(), vulkan(vulkan) {
 
     std::vector<VkAttachmentDescription> attachmentDescriptions;
     std::vector<VkAttachmentReference> attachmentReferences;
@@ -15,8 +14,8 @@ RenderPass::RenderPass(Vulkan &vulkan) : vulkan(vulkan) {
 
     for (std::size_t i = 0; i < attachments.size(); i++) {
         const auto &attachment = attachments[i];
-        VkAttachmentDescription *desc;
-        VkAttachmentReference *ref;
+        VkAttachmentDescription *desc = nullptr;
+        VkAttachmentReference *ref = nullptr;
 
         attachmentDescriptions.push_back({});
         desc = &attachmentDescriptions.back();
@@ -79,5 +78,4 @@ RenderPass::~RenderPass() {
 
 VkRenderPass RenderPass::getVk() { return vk; }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

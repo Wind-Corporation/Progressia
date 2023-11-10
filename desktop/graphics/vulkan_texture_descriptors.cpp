@@ -1,7 +1,6 @@
 #include "vulkan_texture_descriptors.h"
 
-namespace progressia {
-namespace desktop {
+namespace progressia::desktop {
 
 void TextureDescriptors::allocatePool() {
     pools.resize(pools.size() + 1);
@@ -16,7 +15,7 @@ void TextureDescriptors::allocatePool() {
     poolInfo.pPoolSizes = &poolSize;
     poolInfo.maxSets = POOL_SIZE;
 
-    auto output = &pools[pools.size() - 1];
+    auto *output = &pools[pools.size() - 1];
     vulkan.handleVkResult(
         "Could not create texture descriptor pool",
         vkCreateDescriptorPool(vulkan.getDevice(), &poolInfo, nullptr, output));
@@ -25,7 +24,7 @@ void TextureDescriptors::allocatePool() {
 }
 
 TextureDescriptors::TextureDescriptors(Vulkan &vulkan)
-    : DescriptorSetInterface(SET_NUMBER, vulkan) {
+    : DescriptorSetInterface(SET_NUMBER, vulkan), lastPoolCapacity(0) {
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 
@@ -48,7 +47,7 @@ TextureDescriptors::TextureDescriptors(Vulkan &vulkan)
 }
 
 TextureDescriptors::~TextureDescriptors() {
-    for (auto pool : pools) {
+    for (auto *pool : pools) {
         vkDestroyDescriptorPool(vulkan.getDevice(), pool, nullptr);
     }
 
@@ -72,7 +71,7 @@ VkDescriptorSet TextureDescriptors::addTexture(VkImageView view,
     allocInfo.descriptorSetCount = 1;
     allocInfo.pSetLayouts = &layout;
 
-    VkDescriptorSet descriptorSet;
+    VkDescriptorSet descriptorSet = nullptr;
     vulkan.handleVkResult("Could not create texture descriptor set",
                           vkAllocateDescriptorSets(vulkan.getDevice(),
                                                    &allocInfo, &descriptorSet));
@@ -102,5 +101,4 @@ VkDescriptorSet TextureDescriptors::addTexture(VkImageView view,
     return descriptorSet;
 }
 
-} // namespace desktop
-} // namespace progressia
+} // namespace progressia::desktop

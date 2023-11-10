@@ -8,8 +8,7 @@
 #include <mutex>
 #include <sstream>
 
-namespace progressia {
-namespace main {
+namespace progressia::main {
 
 namespace detail {
 
@@ -21,7 +20,7 @@ class LogSinkBackend {
     void flush();
 
   public:
-    LogSinkBackend() {}
+    LogSinkBackend() = default;
 
     std::ostream &getOutput() { return buffer; }
 
@@ -46,14 +45,17 @@ class LogSinkBackend {
 namespace {
 std::ofstream openLogFile() {
     // FIXME this is relative to bin, not root dir
-    std::filesystem::create_directories("../run");
-    std::filesystem::create_directories("../run/logs");
-    return std::ofstream("../run/logs/latest.log");
+    std::filesystem::create_directories("run");
+    std::filesystem::create_directories("run/logs");
+    return std::ofstream("run/logs/latest.log");
 }
 } // namespace
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables): TODO
 std::mutex logFileMutex;
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 std::ofstream logFile = openLogFile();
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 thread_local detail::LogSinkBackend theBackend;
 
 std::ostream &detail::LogSink::getStream() const {
@@ -78,7 +80,7 @@ detail::LogSink::~LogSink() {
     }
 }
 
-detail::LogSink::LogSink(LogSink &&moveFrom)
+detail::LogSink::LogSink(LogSink &&moveFrom) noexcept
     : isCurrentSink(moveFrom.isCurrentSink) {
     moveFrom.isCurrentSink = false;
 }
@@ -99,6 +101,7 @@ void detail::LogSinkBackend::flush() {
 namespace {
 // FIXME This approach is horribly inefficient. It is also unsafe if any
 // other piece of code wants access to std::localtime.
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 std::mutex getLocalTimeMutex;
 std::tm getLocalTimeAndDontExplodePlease() {
     std::lock_guard<std::mutex> lock(getLocalTimeMutex);
@@ -165,5 +168,4 @@ detail::LogSink fatal(const char *start) { return log(LogLevel::FATAL, start); }
 
 } // namespace logging
 
-} // namespace main
-} // namespace progressia
+} // namespace progressia::main
